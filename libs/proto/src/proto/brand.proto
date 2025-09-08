@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package brand;
+
+
+
+message Brand {
+  string id = 1;
+  string name = 2;
+  bool active = 5;
+  string deletedAt = 7;
+}
+
+message CreateBrandRequest {
+  string name = 1;
+  bool active = 4;
+}
+
+message UpdateBrandRequest {
+  string id = 1;
+  string name = 2;
+  bool active = 5;
+}
+
+message DeleteBrandRequest {
+  string id = 1;
+}
+
+message GetBrandRequest {
+  string id = 1;
+}
+
+message ListBrandRequest {
+  string keyword = 3;       
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message BrandResponse {
+   string id = 1;
+  string name = 2;
+  bool active = 5;
+}
+
+message BrandListResponse {
+  repeated Brand brand = 1;
+  int32 total = 2;
+}
+
+
+service BrandService {
+  rpc CreateBrand (CreateBrandRequest) returns (BrandResponse);
+  rpc UpdateBrand (UpdateBrandRequest) returns (BrandResponse);
+  rpc DeleteBrand (DeleteBrandRequest) returns (BrandResponse);
+  rpc GetBrand    (GetBrandRequest)    returns (BrandResponse);
+  rpc ListBrand (ListBrandRequest) returns (BrandListResponse);
+  
+}

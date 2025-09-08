@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package inventory;
+
+service InventoryService {
+  rpc CheckStock (CheckStockRequest) returns (CheckStockResponse);
+  rpc ReserveStock (ReserveStockRequest) returns (ReserveStockResponse);
+  rpc SyncStockFromRedis (SyncStockFromRedisRequest) returns (SyncStockFromRedisResponse);
+}
+
+message CheckStockRequest {
+  repeated string skuCodes = 1;
+}
+
+message StockItem {
+  string skuCode = 1;
+  int32 stock = 2;
+}
+
+message CheckStockResponse {
+  repeated StockItem items = 1;
+}
+
+message ReserveStockRequest {
+  repeated ReserveStockItem items = 1;
+}
+
+message ReserveStockItem {
+  string skuCode = 1;
+  int32 quantity = 2;
+}
+
+message ReserveStockResponse {
+  bool success = 1;
+  repeated string reservedSkuCodes = 2;
+}
+
+message SyncStockFromRedisRequest {
+  repeated string skuCodes = 1;
+}
+
+message SyncStockFromRedisResponse {
+  bool success = 1;
+  repeated string syncedSkuCodes = 2;
+}

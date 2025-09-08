@@ -1,0 +1,42 @@
+{
+  "name": "@nestcm/proto",
+  "version": "1.0.0",
+  "description": "Proto files and gRPC types for NestCM microservices",
+  "main": "src/index.ts",
+  "scripts": {
+  "proto:generate": "npx protoc --ts_proto_out=./src/generated --ts_proto_opt=esModuleInterop=true,forceLong=string,useOptionals=messages --proto_path=./src/proto ./src/proto/*.proto",
+  "proto:clean": "rimraf src/generated",
+  "proto:setup": "npm run proto:clean && npm run proto:generate",
+  "build": "npm run proto:generate && tsc",
+  "build:watch": "npm run proto:generate && tsc --watch"
+}
+,
+  "dependencies": {
+    "@grpc/grpc-js": "^1.9.0",
+    "@grpc/proto-loader": "^0.7.0",
+    "@nestjs/microservices": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/google-protobuf": "^3.15.0",
+    "@types/node": "^20.0.0",
+    "grpc-tools": "^1.12.0",
+    "nodemon": "^3.0.0",
+    "protoc-gen-ts": "^1.0.0",
+    "protoc-gen-ts_proto": "^1.0.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0"
+  },
+  "keywords": [
+    "grpc",
+    "protobuf",
+    "microservices",
+    "nestjs",
+    "typescript"
+  ],
+  "author": "NestCM Team",
+  "license": "MIT"
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package recommendation;
+
+// Service để lấy gợi ý sản phẩm
+service RecommendationService {
+  rpc GetRecommendations(RecommendationRequest) returns (RecommendationResponse);
+}
+
+// Request khi người dùng xem chi tiết sản phẩm
+message RecommendationRequest {
+  string userId = 1;
+  string productId = 2; // ID của sản phẩm đang được xem
+}
+
+// Thông tin chi tiết của một sản phẩm gợi ý
+message RecommendedProduct {
+  string productId = 1;
+  string name = 2;
+  string imageUrl = 3;
+  double score = 4; // Điểm số gợi ý (tùy chọn)
+}
+
+// Phản hồi chứa danh sách các sản phẩm gợi ý
+message RecommendationResponse {
+  repeated RecommendedProduct products = 1;
+}

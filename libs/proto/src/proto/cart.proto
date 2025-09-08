@@ -1,0 +1,46 @@
+syntax = "proto3";
+package cart;
+
+service CartService {
+  rpc AddToCart (AddToCartRequest) returns (AddToCartResponse);
+  rpc GetCart (GetCartRequest) returns (GetCartResponse);
+}
+
+message AddToCartRequest {
+  string userId = 1;
+  string skuId = 2;
+  int32 quantity = 3;
+  double price = 4;
+  ItemDetail itemDetail = 5;
+}
+
+message ItemDetail {
+  string name = 1;
+  double price = 2;
+  string skuCode = 3;
+  int32 stock = 4;
+  map<string, string> options = 5; 
+}
+
+message AddToCartResponse {
+  string message = 1;
+}
+
+message GetCartRequest {
+  string userId = 1;
+}
+
+message CartItem {
+  string id =1;
+  string productId = 2;
+  string skuId = 3;
+  string name = 4;
+  string image = 5;
+  int32 quantity = 6;
+  double price = 7;
+  map<string, string> options = 9;
+}
+
+message GetCartResponse {
+  repeated CartItem items = 1;
+}

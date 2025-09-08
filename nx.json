@@ -1,6 +1,26 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "master",
+  "npmScope": "nestcm",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e",
+          "build-deps",
+          "watch-deps",
+          "proto:generate",
+          "proto:generate:all"
+        ],
+        "parallel": 3,
+        "cacheDirectory": ".nx-cache"
+      }
+    }
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -14,6 +34,41 @@
       "!{projectRoot}/test-setup.[jt]s"
     ],
     "sharedGlobals": []
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "serve": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "cache": true,
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "cache": true
+    },
+    "e2e": {
+      "inputs": ["default", "^production"],
+      "cache": false
+    },
+    "proto:generate": {
+      "inputs": ["default"],
+      "cache": true,
+      "outputs": ["{projectRoot}/src/generated"]
+    },
+    "proto:generate:all": {
+      "dependsOn": ["proto:generate"],
+      "inputs": ["default"],
+      "cache": true,
+      "outputs": ["{projectRoot}/src/generated"]
+    }
   },
   "plugins": [
     {
@@ -38,7 +93,96 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/api-gateway-e2e/**/*"]
+      "exclude": [
+        "apps/api-gateway-e2e/**/*",
+        "apps/product-service-e2e/**/*",
+        "apps/cart-service-e2e/**/*",
+        "apps/inventories-service-e2e/**/*",
+        "apps/notification-service-e2e/**/*",
+        "apps/order-service-e2e/**/*",
+        "apps/elastic-elastic-service-e2e/**/*"
+      ]
     }
-  ]
+  ],
+  "generators": {
+    "@nx/nest:application": {
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "jest",
+      "linter": "eslint",
+      "style": "css"
+    },
+    "@nx/nest:library": {
+      "unitTestRunner": "jest",
+      "linter": "eslint",
+      "style": "css"
+    },
+    "@nx/nest:service": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:controller": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:decorator": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:filter": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:gateway": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:interceptor": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:middleware": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:pipe": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:resolver": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    },
+    "@nx/nest:resource": {
+      "unitTestRunner": "jest",
+      "linter": "eslint"
+    }
+  },
+  "affected": {
+    "defaultBase": "master"
+  },
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
+  },
+  "cli": {
+    "defaultCollection": "@nx/nest",
+    "packageManager": "npm"
+  },
+  "defaultProject": "api-gateway",
+  "aliases": {
+    "proto": "libs/proto",
+    "common": "libs/common",
+    "database": "libs/database",
+    "auth": "libs/auth",
+    "api-gateway": "apps/api-gateway",
+    "product-service": "apps/product-service",
+    "cart-service": "apps/cart-service",
+    "inventories-service": "apps/inventories-service",
+    "notification-service": "apps/notification-service",
+    "order-service": "apps/order-service",
+    "proto:generate": "nx run proto:proto:generate",
+    "proto:generate:all": "nx run proto:proto:generate:all",
+    "proto:clean": "nx run proto:proto:clean",
+    "proto:watch": "nx run proto:proto:watch"
+  }
 }

@@ -1,0 +1,4 @@
+export const PRODUCT_PACKAGE = 'PRODUCT_PACKAGE';
+export const PRODUCT_GRPC_SERVICE = 'PRODUCT_GRPC_SERVICE';
+export const PRODUCT_SERVICE_NAME = 'ProductService';
+
