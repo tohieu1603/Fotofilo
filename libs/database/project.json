@@ -4,6 +4,16 @@
   "sourceRoot": "libs/database/src",
   "projectType": "library",
   "tags": [],
-  "// targets": "to see all targets run: nx show project database --web",
-  "targets": {}
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/dist/libs/database"],
+      "options": {
+        "outputPath": "dist/libs/database",
+        "main": "libs/database/src/index.ts",
+        "tsConfig": "libs/database/tsconfig.lib.json",
+        "assets": ["libs/database/README.md"]
+      }
+    }
+  }
 }

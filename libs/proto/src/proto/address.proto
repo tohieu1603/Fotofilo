@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package address;
+
+import "google/protobuf/empty.proto";
+
+message Address {
+  string id = 1;
+  string userId = 2;
+  string fullName = 3;
+  string phoneNumber = 4;
+  string email = 5;
+  string city = 6;
+  string district = 7;
+  string ward = 8;
+  string streetAddress = 9;
+}
+
+message CreateAddressRequest {
+  string userId = 1;  
+  string fullName = 2;
+  string phoneNumber = 3;
+  string email = 4;
+  string city = 5;
+  string district = 6;
+  string ward = 7;
+  string streetAddress = 8;
+}
+
+message UpdateAddressRequest {
+  string id = 1;
+  string fullName = 2;
+  string phoneNumber = 3;
+  string email = 4;
+  string city = 5;
+  string district = 6;
+  string ward = 7;
+  string streetAddress = 8;
+}
+
+message GetAddressRequest {
+  string id = 1;
+}
+
+message DeleteAddressRequest {
+  string id = 1;
+}
+
+message ListAddressesByUserRequest {
+  string userId = 1;  
+}
+
+message AddressResponse {
+  Address address = 1;
+}
+
+message ListAddressesResponse {
+  repeated Address addresses = 1;
+}
+
+service AddressService {
+  rpc CreateAddress (CreateAddressRequest) returns (AddressResponse);
+  rpc GetAddress (GetAddressRequest) returns (AddressResponse);
+  rpc UpdateAddress (UpdateAddressRequest) returns (AddressResponse);
+  rpc DeleteAddress (DeleteAddressRequest) returns (google.protobuf.Empty);
+  rpc ListAddressesByUser (ListAddressesByUserRequest) returns (ListAddressesResponse);
+}

@@ -7,13 +7,33 @@ service ProductService {
   rpc GetProduct (GetProductRequest) returns (GetProductResponse);
   rpc GetProducts (GetAllProductsRequest) returns (GetAllProductsResponse);  
   rpc ValidateSkuInputs (ValidateSkuInputRequest) returns (ValidateSkuInputResponse);
-  rpc GetProductSku  (GetProductSkuRequest) returns (GetProductSkuResponse);
-  rpc GetProductSkus  (ListSkuRequest) returns (ListSkuResponse);
   rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
   rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+  rpc existingSku (CheckSkuAvailabilityRequest) returns (CheckSkuAvailabilityResponse);
 }
 
-// ----- Create Product -----
+message CheckSkuAvailabilityRequest {
+  string skuId = 1;      
+  int32 quantity = 2;     
+}
+
+message CheckSkuAvailabilityResponse {
+  bool exists = 1;
+  bool inStock = 2;
+  int32 availableStock = 3;
+  string message = 4;
+  string productId = 5;
+  string skuCode = 6;
+  double price = 7;
+  string productName = 8;
+  string description = 9;
+  string image = 10;
+  string brandId = 11;
+  string categoryId = 12;
+  repeated SkuOptionResponse skuOptions = 13;
+}
+
+// ======================= Create Product =======================
 message CreateProductRequest {
   string name = 1;
   string description = 2;
@@ -26,7 +46,8 @@ message CreateSkuInput {
   string skuCode = 1;
   double price = 2;
   int32 stock = 3;
-  repeated AttributeInput attributes = 4;
+  string image = 4;
+  repeated AttributeInput attributes = 5;
 }
 
 message AttributeInput {
@@ -34,11 +55,10 @@ message AttributeInput {
 }
 
 message CreateProductResponse {
-  string id = 1;
-  string name = 2;
+  GetProductResponse product = 1;
 }
 
-// ----- Get Product -----
+// ======================= Get Product =======================
 message GetProductRequest {
   string id = 1;
   optional string userId = 2;
@@ -53,10 +73,10 @@ message GetProductResponse {
   repeated SkuResponse skus = 6;
 }
 
-// ----- Get Product SKU -----
 message GetProductSkuRequest {
   string id = 1;
 }
+
 message ListSkuRequest {
   repeated string skuIds = 1;
 }
@@ -64,6 +84,7 @@ message ListSkuRequest {
 message ListSkuResponse {
   repeated SkuResponse skus = 1;
 }
+
 message GetProductSkuResponse {
   string id = 1;
   string name = 2;
@@ -73,7 +94,7 @@ message GetProductSkuResponse {
   repeated SkuResponse skus = 6;
 }
 
-// ----- Update Product -----
+// ======================= Update Product =======================
 message UpdateProductRequest {
   string id = 1;
   string name = 2;
@@ -84,11 +105,10 @@ message UpdateProductRequest {
 }
 
 message UpdateProductResponse {
-  string id = 1;
-  string name = 2;
+  GetProductResponse product = 1;
 }
 
-// ----- Delete Product -----
+// ======================= Delete Product =======================
 message DeleteProductRequest {
   string id = 1;
 }
@@ -97,7 +117,7 @@ message DeleteProductResponse {
   bool message = 1;
 }
 
-// ----- Get All Products -----
+// ======================= Get All Products =======================
 message GetAllProductsRequest {
   int32 page = 1;
   int32 limit = 2;
@@ -115,13 +135,13 @@ message GetAllProductsResponse {
   int32 totalPages = 5;  
 }
 
-// ----- SKU Details -----
 message SkuResponse {
   string id = 1;
   string skuCode = 2;
   double price = 3;
   int32 stock = 4;
-  repeated SkuOptionResponse skuOptions = 5;
+  string image = 5;
+  repeated SkuOptionResponse skuOptions = 6;
 }
 
 message SkuOptionResponse {
@@ -136,18 +156,40 @@ message AttributeDetail {
   string description = 3;
 }
 
-// ----- SKU Validation -----
 message SkuValidationInput {
-  string skuId = 1;
-  string skuCode = 2;
-  string productId = 3;
+  string productId = 1;
+  string skuId = 2;
+  string skuCode = 3;
+  int32 quantity = 4;
 }
 
 message ValidateSkuInputRequest {
   repeated SkuValidationInput items = 1;
 }
 
+message SkuValidationResult {
+  // Thông tin sản phẩm
+  string productId = 1;
+  string name = 2;
+  string description = 3;
+  string brandId = 4;
+  string categoryId = 5;
+
+  string skuId = 6;
+  string skuCode = 7;
+  double price = 8;
+  int32 stock = 9;
+  string image = 10;
+  repeated SkuOptionResponse skuOptions = 11;
+
+  // Trạng thái kiểm tra
+  bool valid = 12;
+  bool inStock = 13;
+  int32 availableStock = 14;
+  string message = 15;
+}
+
 message ValidateSkuInputResponse {
-  bool valid = 1;
-  repeated string invalidSkuCodes = 2;
+  bool allValid = 1;
+  repeated SkuValidationResult results = 2;
 }

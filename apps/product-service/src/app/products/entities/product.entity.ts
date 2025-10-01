@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Brand } from './brand.entity';
-import { Category } from './category.entity';
+import { CategoryEntity } from '../../categories/infrastructure/entities/category.entity';
 import { Sku } from './sku.entity';
 
 @Entity('products')
@@ -35,8 +35,8 @@ export class Product {
   @ManyToOne(() => Brand, (brand) => brand.products)
   brand?: Brand;
 
-  @ManyToOne(() => Category, (category) => category.products)
-  category?: Category;
+  @ManyToOne(() => CategoryEntity, (category) => category.products)
+  category?: CategoryEntity;
 
   @OneToMany(() => Sku, (sku) => sku.product)
   skus: Sku[];

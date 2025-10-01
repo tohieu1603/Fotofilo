@@ -11,7 +11,13 @@
         "jestConfig": "apps/cart-service-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["cart-service:build", "cart-service:serve"]
+      "dependsOn": ["cart-service:build", "cart-service:serve"],
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "watchAll": false
+        }
+      }
     }
   }
 }

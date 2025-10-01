@@ -6,15 +6,34 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
-        "command": "webpack-cli build",
-        "args": ["--node-env=production"],
-        "cwd": "apps/product-service"
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/product-service",
+        "main": "apps/product-service/src/main.ts",
+        "tsConfig": "apps/product-service/tsconfig.app.json",
+        "webpackConfig": "apps/product-service/webpack.config.js",
+        "generatePackageJson": true
       },
       "configurations": {
         "development": {
-          "args": ["--node-env=development"]
+          "optimization": false,
+          "extractLicenses": false,
+          "inspect": false
+        },
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/product-service/src/environments/environment.ts",
+              "with": "apps/product-service/src/environments/environment.prod.ts"
+            }
+          ]
         }
       }
     },

@@ -1,9 +1,11 @@
 syntax = "proto3";
+
 package cart;
 
 service CartService {
   rpc AddToCart (AddToCartRequest) returns (AddToCartResponse);
   rpc GetCart (GetCartRequest) returns (GetCartResponse);
+  rpc DeleteCart (DeleteCartRequest) returns (DeleteCartResponse);
 }
 
 message AddToCartRequest {
@@ -14,33 +16,52 @@ message AddToCartRequest {
   ItemDetail itemDetail = 5;
 }
 
-message ItemDetail {
-  string name = 1;
-  double price = 2;
-  string skuCode = 3;
-  int32 stock = 4;
-  map<string, string> options = 5; 
-}
-
 message AddToCartResponse {
-  string message = 1;
+  CartEntity cart = 1;  
+  string message = 2;   
 }
 
 message GetCartRequest {
   string userId = 1;
 }
 
-message CartItem {
-  string id =1;
-  string productId = 2;
-  string skuId = 3;
-  string name = 4;
-  string image = 5;
-  int32 quantity = 6;
-  double price = 7;
-  map<string, string> options = 9;
+message GetCartResponse {
+  CartEntity cart = 1;   
 }
 
-message GetCartResponse {
-  repeated CartItem items = 1;
+message CartEntity {
+  string id = 1;
+  string userId = 2;
+  repeated CartItemEntity items = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
 }
+message DeleteCartRequest {
+  string cartId = 1;
+}
+message DeleteCartResponse {
+  bool success = 1;   
+}
+
+message CartItemEntity {
+  string id = 1;
+  string cartId = 2;
+  string skuId = 3;
+  int32 quantity = 4;
+  double price = 5;
+  string image = 6;
+  ItemDetail itemDetail = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message ItemDetail {
+  string name = 1;
+  string description = 2;
+  string brand = 3;
+  string category = 4;
+  string image = 5;
+  map<string, string> attributes = 6;
+  map<string, string> variants = 7;
+}
+

@@ -1,78 +1,52 @@
-import { Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
-import { lastValueFrom, Observable } from 'rxjs';
-import {
-  CreateProductRequest,
-  CreateProductResponse,
-  DeleteProductRequest,
-  DeleteProductResponse,
-  GetAllProductsRequest,
-  GetAllProductsResponse,
-  GetProductRequest,
-  GetProductResponse,
-  UpdateProductRequest,
-  UpdateProductResponse,
-  GetProductSkuRequest,
-  GetProductSkuResponse,
-  ListSkuRequest,
-  ListSkuResponse,
-  ValidateSkuInputRequest,
-  ValidateSkuInputResponse,
-} from '@nestcm/proto';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { timeout } from 'rxjs/operators';
-import { PRODUCT_GRPC_SERVICE } from './product.constants';
-
-export interface ProductGrpcService {
-  CreateProduct(req: CreateProductRequest): Observable<CreateProductResponse>;
-  GetProduct(req: GetProductRequest): Observable<GetProductResponse>;
-  GetProducts(req: GetAllProductsRequest): Observable<GetAllProductsResponse>;
-  ValidateSkuInputs(req: ValidateSkuInputRequest): Observable<ValidateSkuInputResponse>;
-  GetProductSku(req: GetProductSkuRequest): Observable<GetProductSkuResponse>;
-  GetProductSkus(req: ListSkuRequest): Observable<ListSkuResponse>;
-  UpdateProduct(req: UpdateProductRequest): Observable<UpdateProductResponse>;
-  DeleteProduct(req: DeleteProductRequest): Observable<DeleteProductResponse>;
-}
+import { Metadata, Product } from '@nestcm/proto';
+import { ClientGrpc } from '@nestjs/microservices';
+import { from, lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class ProductService {
-  constructor(@Inject(PRODUCT_GRPC_SERVICE) private readonly svc: ProductGrpcService) {}
+export class ProductService implements OnModuleInit {
+  private productService: Product.ProductServiceClient;
 
-  private async unary<T>(obs: Observable<T>, ms = 5000): Promise<T> {
-    try {
-      return await lastValueFrom(obs.pipe(timeout(ms)));
-    } catch (err: any) {
-      // Let the global/controller filter map gRPC errors. Map timeouts explicitly.
-      if (err?.name === 'TimeoutError') {
-        throw new RequestTimeoutException('Upstream service timeout');
-      }
-      throw err;
-    }
+
+  constructor(@Inject(Product.PRODUCT_PACKAGE_NAME) private readonly client: ClientGrpc) { }
+  onModuleInit() {
+    this.productService = this.client.getService<Product.ProductServiceClient>(Product.PRODUCT_SERVICE_NAME);
   }
 
-  createProduct(req: CreateProductRequest) {
-    return this.unary(this.svc.CreateProduct(req));
+  createProduct(req: Product.CreateProductRequest): Promise<Product.CreateProductResponse> {
+    return lastValueFrom(
+      from(this.productService.createProduct(req, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
   }
-  getProduct(req: GetProductRequest) {
-    return this.unary(this.svc.GetProduct(req));
+  getProduct(req: Product.GetProductRequest): Promise<Product.GetProductResponse> {
+    return lastValueFrom(
+      from(this.productService.getProduct(req, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
   }
-  getProducts(req: GetAllProductsRequest) {
-    return this.unary(this.svc.GetProducts(req));
+  getProducts(req: Product.GetAllProductsRequest): Promise<Product.GetAllProductsResponse> {
+    return lastValueFrom(
+      from(this.productService.getProducts(req, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
   }
-  validateSkuInputs(req: ValidateSkuInputRequest) {
-    return this.unary(this.svc.ValidateSkuInputs(req));
+  updateProduct(req: Product.UpdateProductRequest): Promise<Product.UpdateProductResponse> {
+    return lastValueFrom(
+      from(this.productService.updateProduct(req, new Metadata)).pipe(
+        timeout(5000)
+      )
+    )
   }
-  getProductSku(req: GetProductSkuRequest) {
-    return this.unary(this.svc.GetProductSku(req));
-  }
-  getProductSkus(req: ListSkuRequest) {
-    return this.unary(this.svc.GetProductSkus(req));
-  }
-  updateProduct(req: UpdateProductRequest) {
-    return this.unary(this.svc.UpdateProduct(req));
-  }
-  deleteProduct(req: DeleteProductRequest) {
-    return this.unary(this.svc.DeleteProduct(req));
-  }
-  get grpc() {
-    return this.svc;
+  deleteProduct(req: Product.DeleteProductRequest): Promise<Product.DeleteProductResponse> {
+    return lastValueFrom(
+      from(this.productService.deleteProduct(req, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
   }
 }

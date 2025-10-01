@@ -7,4 +7,13 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/cart-service',
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid)/)',
+  ],
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 };

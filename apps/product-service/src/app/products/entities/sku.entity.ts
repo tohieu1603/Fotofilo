@@ -16,6 +16,9 @@ export class Sku {
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
+  @Column({ nullable: true })
+  image: string;
+
   @Column({ default: 0 })
   stock: number;
 

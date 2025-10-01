@@ -4,31 +4,34 @@
   "description": "Proto files and gRPC types for NestCM microservices",
   "main": "src/index.ts",
   "scripts": {
-  "proto:generate": "npx protoc --ts_proto_out=./src/generated --ts_proto_opt=esModuleInterop=true,forceLong=string,useOptionals=messages --proto_path=./src/proto ./src/proto/*.proto",
-  "proto:clean": "rimraf src/generated",
-  "proto:setup": "npm run proto:clean && npm run proto:generate",
-  "build": "npm run proto:generate && tsc",
-  "build:watch": "npm run proto:generate && tsc --watch"
-}
-,
+    "proto:generate": "npm run proto:generate:nestjs",
+    "proto:generate:nestjs": "node -e \"const fs=require('fs'); const path=require('path'); fs.mkdirSync(path.join(__dirname, 'src', 'generated'), { recursive: true });\" && npx protoc --plugin=node_modules/.bin/protoc-gen-ts_proto.cmd --ts_proto_out=./src/generated --ts_proto_opt=nestJs=true,addGrpcMetadata=true,addNestjsRestParameter=true,returnObservable=false,useOptionals=messages,outputServices=grpc-js,outputTypeRegistry=false --proto_path=./src/proto ./src/proto/*.proto",
+    "proto:generate:all": "npm run proto:setup",
+    "proto:clean": "rimraf src/generated && node -e \"const fs=require('fs'); const path=require('path'); fs.mkdirSync(path.join(__dirname, 'src', 'generated'), { recursive: true });\"",
+    "proto:setup": "npm run proto:clean && npm run proto:generate:nestjs",
+    "build": "npm run proto:generate && tsc",
+    "build:watch": "npm run proto:generate && tsc --watch"
+  },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.0",
     "@grpc/proto-loader": "^0.7.0",
-    "@nestjs/microservices": "^10.0.0"
+    "@nestjs/microservices": "^11.1.6",
+    "@protobuf-ts/plugin": "^2.11.1",
+    "@protobuf-ts/protoc": "^2.11.1"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.0",
     "@types/node": "^20.0.0",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
     "grpc-tools": "^1.12.0",
     "nodemon": "^3.0.0",
-    "protoc-gen-ts": "^1.0.0",
-    "protoc-gen-ts_proto": "^1.0.0",
     "rimraf": "^5.0.0",
+    "ts-proto": "^1.165.0",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0"
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0"
   },
   "keywords": [
     "grpc",
@@ -40,3 +43,5 @@
   "author": "NestCM Team",
   "license": "MIT"
 }
+
+

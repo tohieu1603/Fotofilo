@@ -1,45 +1,88 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { normalizePagination } from '../shared/pagination/pagination.util';
-import { CreateProductRequest, CreateProductResponse, DeleteProductRequest, DeleteProductResponse, GetAllProductsRequest, GetAllProductsResponse, GetProductRequest, GetProductResponse, ProductService, ProductServiceServiceName, UpdateProductRequest, UpdateProductResponse } from '@nestcm/proto';
-import { GetProductSkuRequest, GetProductSkuResponse, ListSkuRequest, ListSkuResponse, ValidateSkuInputRequest, ValidateSkuInputResponse } from 'libs/proto/src/generated/product';
+import { Product as ProductProto } from '@nestcm/proto';
 
-@Controller('products')
-export class ProductsController implements ProductService {
-  constructor(private readonly productsService: ProductsService) {
-    
-  }
-  CreateProduct(@Body() request: CreateProductRequest): Promise<CreateProductResponse> {
+@Controller()
+@ProductProto.ProductServiceControllerMethods()
+export class ProductsController implements ProductProto.ProductServiceController {
+  constructor(private readonly productsService: ProductsService) {}
+
+  createProduct(request: ProductProto.CreateProductRequest): Promise<ProductProto.CreateProductResponse> {
     return this.productsService.createProductWithSkus(request);
   }
-  GetProduct(request: GetProductRequest): Promise<GetProductResponse> {
+
+  getProduct(request: ProductProto.GetProductRequest): Promise<ProductProto.GetProductResponse> {
     return this.productsService.getProduct(request.id);
   }
 
-  async GetProducts(request: GetAllProductsRequest): Promise<GetAllProductsResponse> {
+  async getProducts(request: ProductProto.GetAllProductsRequest): Promise<ProductProto.GetAllProductsResponse> {
     const { page, limit } = normalizePagination(request?.page, request?.limit);
-    const res = await this.productsService.listProducts(
+    return this.productsService.listProducts(
       page,
       limit,
       request?.keyword,
       request?.brandId,
       request?.categoryId,
     );
-    return res;
   }
-  UpdateProduct(request: UpdateProductRequest): Promise<UpdateProductResponse> {
+
+  updateProduct(request: ProductProto.UpdateProductRequest): Promise<ProductProto.UpdateProductResponse> {
     return this.productsService.updateProduct(request.id, request);
-  }  
-  DeleteProduct(request: DeleteProductRequest): Promise<DeleteProductResponse> {
+  }
+
+  deleteProduct(request: ProductProto.DeleteProductRequest): Promise<ProductProto.DeleteProductResponse> {
     return this.productsService.deleteProduct(request.id);
   }
-  ValidateSkuInputs(request: ValidateSkuInputRequest): Promise<ValidateSkuInputResponse> {
-      throw new Error('Method not implemented.');
+
+  validateSkuInputs(request: ProductProto.ValidateSkuInputRequest): Promise<ProductProto.ValidateSkuInputResponse> {
+    return this.productsService.validateSkuInputs(request);
   }
-  GetProductSku(request: GetProductSkuRequest): Promise<GetProductSkuResponse> {
-      throw new Error('Method not implemented.');
+
+  getProductSku(request: ProductProto.GetProductSkuRequest): Promise<ProductProto.GetProductSkuResponse> {
+    throw new Error('Method not implemented.');
   }
-  GetProductSkus(request: ListSkuRequest): Promise<ListSkuResponse> {
-      throw new Error('Method not implemented.');
+
+  getProductSkus(request: ProductProto.ListSkuRequest): Promise<ProductProto.ListSkuResponse> {
+    throw new Error('Method not implemented.');
+  }
+
+  @Get('products/skus/:skuId')
+  async checkSku(@Param('skuId') skuId: string) {
+    const result = await this.productsService.getSkuDetail(skuId);
+    return {
+      message: 'SKU lookup successful',
+      ...result,
+    };
+  }
+
+  // REST endpoints
+  @Post('products')
+  async createProductRest(@Body() body: any): Promise<ProductProto.CreateProductResponse> {
+    return this.productsService.createProductWithSkus(body);
+  }
+
+  @Get('products/:id')
+  async getProductRest(@Param('id') id: string): Promise<ProductProto.GetProductResponse> {
+    return this.productsService.getProduct(id);
+  }
+
+  @Get('products')
+  async getProductsRest(): Promise<ProductProto.GetAllProductsResponse> {
+    return this.productsService.listProducts(1, 100);
+  }
+
+  @Put('products/:id')
+  async updateProductRest(@Param('id') id: string, @Body() body: any): Promise<ProductProto.UpdateProductResponse> {
+    return this.productsService.updateProduct(id, body);
+  }
+
+  @Delete('products/:id')
+  async deleteProductRest(@Param('id') id: string): Promise<ProductProto.DeleteProductResponse> {
+    return this.productsService.deleteProduct(id);
+  }
+
+  existingSku(request: ProductProto.CheckSkuAvailabilityRequest): Promise<ProductProto.CheckSkuAvailabilityResponse> {
+    return this.productsService.existingSku(request);
   }
 }

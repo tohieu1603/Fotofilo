@@ -4,7 +4,6 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   Min,
   ValidateNested,
@@ -30,6 +29,10 @@ export class CreateSkuInputDto {
   @IsNumber()
   @Min(0)
   stock!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  image!: string;
 
   @IsArray()
   @ArrayMinSize(1)

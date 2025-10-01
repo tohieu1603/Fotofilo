@@ -14,7 +14,7 @@ service AuthService {
   rpc CheckRole (CheckRoleRequest) returns (CheckRoleResponse);
   rpc GetUserRoles (GetUserRolesRequest) returns (GetUserRolesResponse);
 
-    rpc GetAllUsers (GetAllUserRequest) returns (GetAllUserResponse);
+  rpc GetAllUsers (GetAllUserRequest) returns (GetAllUserResponse);
   rpc GetUserById (GetUserByIdRequest) returns (UserResponse);
   rpc CreateUser (CreateUserRequest) returns (UserResponse);
   rpc UpdateUser (UpdateUserRequest) returns (UserResponse);

@@ -9,7 +9,6 @@ import { DatabaseService } from './database.service';
     {
       provide: 'DATABASE_CONFIG',
       useFactory: () => ({
-        // Common database configuration
         connectionTimeout: 30000,
         acquireTimeout: 30000,
         timeout: 30000,

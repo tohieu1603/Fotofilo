@@ -4,11 +4,14 @@ import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { Sku } from './entities/sku.entity';
 import { Brand } from './entities/brand.entity';
-import { Category } from './entities/category.entity';
+import { CategoryEntity } from '../categories';
 import { AttributeOption } from './entities/attribute-option.entity';
 import { SkuAttributeOption } from './entities/sku-attribute-option.entity';
 import { ProductsController } from './products.controller';
 import { Attribute } from './entities/attribute.entity';
+import { CommonModule } from '@nestcm/common';
+import { KafkaService } from '../shared/kafka/kafka.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -16,14 +19,30 @@ import { Attribute } from './entities/attribute.entity';
       Product,
       Sku,
       Brand,
-      Category,
+      CategoryEntity,
       AttributeOption,
       SkuAttributeOption,
       Attribute
     ]),
+    CommonModule,
+    ClientsModule.register([
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'product-service',
+            brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+          },
+          consumer: {
+            groupId: 'product-consumer-group',
+          },
+        },
+      },
+    ]),
   ],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, KafkaService],
   exports: [ProductsService],
 })
 export class ProductsModule {}

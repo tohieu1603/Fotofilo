@@ -12,8 +12,14 @@ export default new DataSource({
   password: process.env.PRODUCT_DB_PASSWORD || '123456789',
   database: process.env.PRODUCT_DB_DATABASE || 'product_db',
   schema: process.env.PRODUCT_DB_SCHEMA || 'public',
-  entities: ['apps/product-service/src/app/product/infrastructure/typeorm/*.entity{.ts,.js}'],
+  entities: [
+    'apps/product-service/src/app/brands/infrastructure/entities/*.entity{.ts,.js}',
+    'apps/product-service/src/app/categories/infrastructure/entities/*.entity{.ts,.js}',
+    'apps/product-service/src/app/products/entities/*.entity{.ts,.js}'
+  ],
   migrations: ['apps/product-service/src/migrations/*{.ts,.js}'],
   synchronize: false,
-  logging: true,
+  logging: ['query', 'error', 'schema', 'warn', 'info', 'log'],
+  logger: 'advanced-console',
+  maxQueryExecutionTime: 1000, // Log slow queries over 1 second
 });

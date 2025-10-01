@@ -6,6 +6,10 @@ service InventoryService {
   rpc CheckStock (CheckStockRequest) returns (CheckStockResponse);
   rpc ReserveStock (ReserveStockRequest) returns (ReserveStockResponse);
   rpc SyncStockFromRedis (SyncStockFromRedisRequest) returns (SyncStockFromRedisResponse);
+  rpc GetStock (GetStockRequest) returns (GetStockResponse);
+  rpc GetStockLogs (GetStockLogsRequest) returns (GetStockLogsResponse);
+  rpc ImportStock (ImportStockRequest) returns (ImportStockResponse);
+  rpc AdjustStock (AdjustStockRequest) returns (AdjustStockResponse);
 }
 
 message CheckStockRequest {
@@ -42,4 +46,86 @@ message SyncStockFromRedisRequest {
 message SyncStockFromRedisResponse {
   bool success = 1;
   repeated string syncedSkuCodes = 2;
+}
+
+// New messages for detailed inventory management
+message GetStockRequest {
+  string skuCode = 1;
+}
+
+message InventoryStock {
+  string id = 1;
+  string skuId = 2;
+  string skuCode = 3;
+  int32 stock = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message GetStockResponse {
+  InventoryStock stock = 1;
+}
+
+message GetStockLogsRequest {
+  string skuCode = 1;
+}
+
+enum StockLogType {
+  IMPORT = 0;
+  EXPORT = 1;
+  ADJUSTMENT = 2;
+  ROLLBACK = 3;
+  ORDER = 4;
+  FLASH_SALE = 5;
+}
+
+message StockLog {
+  string id = 1;
+  string skuId = 2;
+  string skuCode = 3;
+  StockLogType type = 4;
+  int32 stock = 5;
+  int32 beforeQuantity = 6;
+  int32 afterQuantity = 7;
+  string referenceId = 8;
+  string note = 9;
+  string importSource = 10;
+  string importBatch = 11;
+  string supplierName = 12;
+  double importPrice = 13;
+  string createdAt = 14;
+}
+
+message GetStockLogsResponse {
+  repeated StockLog logs = 1;
+}
+
+message ImportDetails {
+  string importSource = 1;
+  string importBatch = 2;
+  string supplierName = 3;
+  double importPrice = 4;
+  string note = 5;
+}
+
+message ImportStockRequest {
+  string skuCode = 1;
+  int32 quantity = 2;
+  ImportDetails importDetails = 3;
+}
+
+message ImportStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message AdjustStockRequest {
+  string skuCode = 1;
+  int32 newQuantity = 2;
+  string reason = 3;
+}
+
+message AdjustStockResponse {
+  bool success = 1;
+  string message = 2;
 }

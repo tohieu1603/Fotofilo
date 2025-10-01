@@ -100,7 +100,17 @@
         "apps/inventories-service-e2e/**/*",
         "apps/notification-service-e2e/**/*",
         "apps/order-service-e2e/**/*",
-        "apps/elastic-elastic-service-e2e/**/*"
+        "apps/elastic-elastic-service-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "apps-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "apps/auth-service-e2e/**/*",
+        "payment-service-e2e/**/*",
+        "payment-service-e2e/**/*",
+        "apps/payment-service-e2e-e2e/**/*"
       ]
     }
   ],
@@ -108,13 +118,11 @@
     "@nx/nest:application": {
       "unitTestRunner": "jest",
       "e2eTestRunner": "jest",
-      "linter": "eslint",
-      "style": "css"
+      "linter": "eslint"
     },
     "@nx/nest:library": {
       "unitTestRunner": "jest",
-      "linter": "eslint",
-      "style": "css"
+      "linter": "eslint"
     },
     "@nx/nest:service": {
       "unitTestRunner": "jest",

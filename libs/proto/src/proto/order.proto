@@ -2,79 +2,157 @@ syntax = "proto3";
 
 package order;
 
+// Order Service - Domain-Driven Design compliant
 service OrderService {
   rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
   rpc GetOrderById (GetOrderByIdRequest) returns (OrderResponse);
-  rpc ListOrdersByUser (ListOrdersByUserRequest) returns (OrderListResponse);
+  rpc GetOrderByNumber (GetOrderByNumberRequest) returns (OrderResponse);
+  rpc ListOrdersByCustomer (ListOrdersByCustomerRequest) returns (OrderListResponse);
+  rpc UpdateOrderStatus (UpdateOrderStatusRequest) returns (OrderResponse);
+  rpc AddOrderTracking (AddOrderTrackingRequest) returns (OrderResponse);
+  rpc CancelOrder (CancelOrderRequest) returns (OrderResponse);
+}
+
+// Enums
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_PENDING = 1;
+  ORDER_STATUS_PROCESSING = 2;
+  ORDER_STATUS_SHIPPED = 3;
+  ORDER_STATUS_DELIVERED = 4;
+  ORDER_STATUS_CANCELLED = 5;
+}
+
+enum ShippingMethod {
+  SHIPPING_METHOD_UNSPECIFIED = 0;
+  SHIPPING_METHOD_STANDARD = 1;
+  SHIPPING_METHOD_EXPRESS = 2;
+  SHIPPING_METHOD_OVERNIGHT = 3;
+}
+
+// Value Objects
+message Money {
+  double amount = 1;
+  string currency = 2;
 }
 
 message OrderItem {
-  string skuId = 1;
-  string skuCode = 2;
-  int32 quantity = 3;
-  double price = 4;
-  string productId = 5;
-  string productName = 6;
-  string productImage = 7;
+  string product_id = 1;
+  string sku_id = 2;
+  string sku_code = 3;
+  int32 quantity = 4;
+  Money unit_price = 5;
+  Money discount_amount = 6;
+  Money total_amount = 7;
 }
 
+// Request Messages
 message CreateOrderRequest {
-  string userId = 1;
-  string receiverName = 2;
-  string receiverPhone = 3;
-  string address = 4;
-  string ward = 5;
-  string district = 6;
-  string city = 7;
-  string paymentMethod = 8; // cod, momo, etc.
-  double shippingFee = 9;
-  double discount = 10;
-  string note = 11;
-  repeated OrderItem items = 12;
+  // customer_id lấy từ JWT (api-gateway truyền sang)
+  repeated OrderItem items = 1;
+  string shipping_address_id = 2; // lấy từ auth-service
+  string billing_address_id = 3;  // lấy từ auth-service
+  ShippingMethod shipping_method = 4;
+  string notes = 5;
+  Money discount_amount = 6;
+  string currency = 7;
 }
 
 message GetOrderByIdRequest {
-  string orderId = 1;
+  string order_id = 1;
 }
 
-message ListOrdersByUserRequest {
-  string userId = 1;
+message GetOrderByNumberRequest {
+  string order_number = 1;
 }
 
+message ListOrdersByCustomerRequest {
+  // customer_id lấy từ JWT (api-gateway truyền sang)
+  int32 page_size = 1; 
+  string page_token = 2; 
+  OrderStatus status_filter = 3; 
+}
+
+message UpdateOrderStatusRequest {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string notes = 3; 
+}
+
+message AddOrderTrackingRequest {
+  string order_id = 1;
+  string tracking_number = 2;
+  string carrier = 3; 
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+  string reason = 2; 
+}
+
+// Response Messages
 message OrderDetail {
   string id = 1;
-  string skuId = 2;
-  string skuCode = 3;
-  int32 quantity = 4;
-  double price = 5;
-  double totalPrice = 6;
-  string productId = 7;
-  string productName = 8;
-  string productImage = 9;
+  string product_id = 2;
+  string product_name = 3;
+  string product_sku = 4;
+  int32 quantity = 5;
+  Money unit_price = 6;
+  Money discount_amount = 7;
+  Money total_amount = 8;
+  map<string, string> product_attributes = 9;
 }
 
 message OrderResponse {
   string id = 1;
-  string userId = 2;
-  string code = 3;
-  string status = 4;
-  double totalAmount = 5;
-  string paymentMethod = 6;
-  string paymentStatus = 7;
-  double shippingFee = 8;
-  double discount = 9;
-  string note = 10;
-  string receiverName = 11;
-  string receiverPhone = 12;
-  string address = 13;
-  string ward = 14;
-  string district = 15;
-  string city = 16;
-  repeated OrderDetail orderDetails = 17;
-  string createdAt = 18;
-  string updatedAt = 19;
+  string customer_id = 2;
+  string order_number = 3;
+  OrderStatus status = 4;
+  
+  // Financial information
+  Money subtotal = 5;
+  Money tax_amount = 6;
+  Money shipping_amount = 7;
+  Money discount_amount = 8;
+  Money total_amount = 9;
+  
+  // Payment reference (handled by payment-service)
+  string payment_id = 10;
+  
+  // Shipping information
+  ShippingMethod shipping_method = 11;
+  string tracking_number = 12;
+  string shipping_address_id = 13; 
+  string billing_address_id = 14;
+  
+  // Order details
+  repeated OrderDetail order_details = 15;
+  string notes = 16;
+  
+  // Timestamps
+  string created_at = 17;
+  string updated_at = 18;
 }
 
 message OrderListResponse {
   repeated OrderResponse orders = 1;
+  string next_page_token = 2; 
+  int32 total_count = 3; 
+}
+
+// Error Messages
+message OrderError {
+  enum ErrorCode {
+    ERROR_CODE_UNSPECIFIED = 0;
+    ERROR_CODE_ORDER_NOT_FOUND = 1;
+    ERROR_CODE_INVALID_STATUS_TRANSITION = 2;
+    ERROR_CODE_INSUFFICIENT_INVENTORY = 3;
+    ERROR_CODE_INVALID_CUSTOMER = 4;
+    ERROR_CODE_INVALID_ORDER_ITEMS = 5;
+    ERROR_CODE_PAYMENT_REQUIRED = 6;
+  }
+  
+  ErrorCode code = 1;
+  string message = 2;
+  map<string, string> details = 3;
 }
