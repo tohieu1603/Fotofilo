@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package payment;
+
+service PaymentService {
+  rpc CreatePayment (CreatePaymentRequest) returns (PaymentResponse);
+  rpc GetPaymentById (GetPaymentByIdRequest) returns (PaymentResponse);
+  rpc GetPaymentByOrderId (GetPaymentByOrderIdRequest) returns (PaymentResponse);
+  rpc HandleMoMoCallback (MoMoCallbackRequest) returns (CallbackResponse);
+}
+
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  PAYMENT_METHOD_COD = 1;
+  PAYMENT_METHOD_MOMO = 2;
+  PAYMENT_METHOD_VNPAY = 3;
+  PAYMENT_METHOD_STRIPE = 4;
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_PROCESSING = 2;
+  PAYMENT_STATUS_SUCCESS = 3;
+  PAYMENT_STATUS_FAILED = 4;
+  PAYMENT_STATUS_CANCELLED = 5;
+}
+
+message Money {
+  double amount = 1;
+  string currency = 2;
+}
+
+message PaymentResponse {
+  string id = 1;
+  string order_id = 2;
+  string customer_id = 3;
+  Money amount = 4;
+  PaymentMethod payment_method = 5;
+  PaymentStatus status = 6;
+  string transaction_id = 7;
+  string payment_url = 8;
+  string notes = 9;
+  string paid_at = 10;
+  string failed_at = 11;
+  string failure_reason = 12;
+  string created_at = 13;
+  string updated_at = 14;
+}
+
+message CreatePaymentRequest {
+  string order_id = 1;
+  string customer_id = 2;
+  Money amount = 3;
+  PaymentMethod payment_method = 4;
+  string order_info = 5;
+}
+
+message GetPaymentByIdRequest {
+  string id = 1;
+}
+
+message GetPaymentByOrderIdRequest {
+  string order_id = 1;
+}
+
+message MoMoCallbackRequest {
+  string partner_code = 1;
+  string order_id = 2;
+  string request_id = 3;
+  int64 amount = 4;
+  string order_info = 5;
+  string order_type = 6;
+  string trans_id = 7;
+  int32 result_code = 8;
+  string message = 9;
+  string pay_type = 10;
+  int64 response_time = 11;
+  string extra_data = 12;
+  string signature = 13;
+}
+
+message CallbackResponse {
+  bool success = 1;
+  string message = 2;
+}

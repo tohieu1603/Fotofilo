@@ -12,34 +12,89 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "product";
 
-export interface CheckSkuAvailabilityRequest {
-  skuId: string;
-  quantity: number;
+/** ======================= Enums ======================= */
+export enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0,
+  SORT_FIELD_NAME = 1,
+  SORT_FIELD_PRICE = 2,
+  SORT_FIELD_CREATED_AT = 3,
+  UNRECOGNIZED = -1,
 }
 
-export interface CheckSkuAvailabilityResponse {
-  exists: boolean;
-  inStock: boolean;
-  availableStock: number;
-  message: string;
-  productId: string;
+export enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0,
+  SORT_ORDER_ASC = 1,
+  SORT_ORDER_DESC = 2,
+  UNRECOGNIZED = -1,
+}
+
+/** ======================= Attribute ======================= */
+export interface GetAttributesRequest {
+}
+
+export interface GetAttributesResponse {
+  attributes: AttributeDetail[];
+}
+
+export interface GetAttributeOptionsRequest {
+  attributeId: string;
+}
+
+export interface GetAttributeOptionsResponse {
+  attributeId: string;
+  attributeName: string;
+  options: AttributeOption[];
+}
+
+export interface AttributeOption {
+  id: string;
+  value: string;
+  description: string;
+}
+
+export interface AttributeDetail {
+  id: string;
+  name: string;
+  description: string;
+}
+
+/** ======================= Brand & Category ======================= */
+export interface BrandResponse {
+  id: string;
+  name: string;
+}
+
+export interface CategoryResponse {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+/** ======================= SKU ======================= */
+export interface SkuResponse {
+  id: string;
   skuCode: string;
   price: number;
-  productName: string;
-  description: string;
+  stock: number;
   image: string;
-  brandId: string;
-  categoryId: string;
   skuOptions: SkuOptionResponse[];
+  originalPrice: number;
 }
 
-/** ======================= Create Product ======================= */
+export interface SkuOptionResponse {
+  attributeOptionId: string;
+  attributeOptionValue: string;
+  attribute?: AttributeDetail | undefined;
+}
+
+/** ======================= Product CRUD ======================= */
 export interface CreateProductRequest {
   name: string;
   description: string;
   brandId: string;
   categoryId: string;
   skus: CreateSkuInput[];
+  originalPrice: number;
 }
 
 export interface CreateSkuInput {
@@ -58,7 +113,6 @@ export interface CreateProductResponse {
   product?: GetProductResponse | undefined;
 }
 
-/** ======================= Get Product ======================= */
 export interface GetProductRequest {
   id: string;
   userId?: string | undefined;
@@ -68,48 +122,39 @@ export interface GetProductResponse {
   id: string;
   name: string;
   description: string;
-  brandId: string;
-  categoryId: string;
+  brand?: BrandResponse | undefined;
+  category?: CategoryResponse | undefined;
   skus: SkuResponse[];
+  originalPrice: number;
 }
 
 export interface GetProductSkuRequest {
   id: string;
 }
 
-export interface ListSkuRequest {
-  skuIds: string[];
-}
-
-export interface ListSkuResponse {
-  skus: SkuResponse[];
-}
-
 export interface GetProductSkuResponse {
   id: string;
   name: string;
   description: string;
-  brandId: string;
-  categoryId: string;
+  brand?: BrandResponse | undefined;
+  category?: CategoryResponse | undefined;
   skus: SkuResponse[];
 }
 
-/** ======================= Update Product ======================= */
 export interface UpdateProductRequest {
   id: string;
   name: string;
   description: string;
   brandId: string;
   categoryId: string;
-  /** reuse input from Create */
   skus: CreateSkuInput[];
+  originalPrice: number;
 }
 
 export interface UpdateProductResponse {
   product?: GetProductResponse | undefined;
 }
 
-/** ======================= Delete Product ======================= */
 export interface DeleteProductRequest {
   id: string;
 }
@@ -118,14 +163,16 @@ export interface DeleteProductResponse {
   message: boolean;
 }
 
-/** ======================= Get All Products ======================= */
 export interface GetAllProductsRequest {
   page: number;
   limit: number;
   keyword: string;
   brandId: string;
   categoryId: string;
-  sort: string;
+  sortField: SortField;
+  sortOrder: SortOrder;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
 }
 
 export interface GetAllProductsResponse {
@@ -136,27 +183,7 @@ export interface GetAllProductsResponse {
   totalPages: number;
 }
 
-export interface SkuResponse {
-  id: string;
-  skuCode: string;
-  price: number;
-  stock: number;
-  image: string;
-  skuOptions: SkuOptionResponse[];
-}
-
-export interface SkuOptionResponse {
-  attributeOptionId: string;
-  attributeOptionValue: string;
-  attribute?: AttributeDetail | undefined;
-}
-
-export interface AttributeDetail {
-  id: string;
-  name: string;
-  description: string;
-}
-
+/** ======================= SKU Validation ======================= */
 export interface SkuValidationInput {
   productId: string;
   skuId: string;
@@ -169,19 +196,17 @@ export interface ValidateSkuInputRequest {
 }
 
 export interface SkuValidationResult {
-  /** Thông tin sản phẩm */
   productId: string;
   name: string;
   description: string;
-  brandId: string;
-  categoryId: string;
+  brand?: BrandResponse | undefined;
+  category?: CategoryResponse | undefined;
   skuId: string;
   skuCode: string;
   price: number;
   stock: number;
   image: string;
   skuOptions: SkuOptionResponse[];
-  /** Trạng thái kiểm tra */
   valid: boolean;
   inStock: boolean;
   availableStock: number;
@@ -193,27 +218,72 @@ export interface ValidateSkuInputResponse {
   results: SkuValidationResult[];
 }
 
-export const PRODUCT_PACKAGE_NAME = "product";
-
-function createBaseCheckSkuAvailabilityRequest(): CheckSkuAvailabilityRequest {
-  return { skuId: "", quantity: 0 };
+/** ======================= SKU Availability ======================= */
+export interface CheckSkuAvailabilityRequest {
+  skuId: string;
+  quantity: number;
 }
 
-export const CheckSkuAvailabilityRequest = {
-  encode(message: CheckSkuAvailabilityRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.skuId !== "") {
-      writer.uint32(10).string(message.skuId);
+export interface CheckSkuAvailabilityResponse {
+  exists: boolean;
+  inStock: boolean;
+  availableStock: number;
+  message: string;
+  productId: string;
+  skuCode: string;
+  price: number;
+  productName: string;
+  description: string;
+  image: string;
+  brand?: BrandResponse | undefined;
+  category?: CategoryResponse | undefined;
+  skuOptions: SkuOptionResponse[];
+}
+
+export const PRODUCT_PACKAGE_NAME = "product";
+
+function createBaseGetAttributesRequest(): GetAttributesRequest {
+  return {};
+}
+
+export const GetAttributesRequest = {
+  encode(_: GetAttributesRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GetAttributesRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAttributesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
-    if (message.quantity !== 0) {
-      writer.uint32(16).int32(message.quantity);
+    return message;
+  },
+};
+
+function createBaseGetAttributesResponse(): GetAttributesResponse {
+  return { attributes: [] };
+}
+
+export const GetAttributesResponse = {
+  encode(message: GetAttributesResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.attributes) {
+      AttributeDetail.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): CheckSkuAvailabilityRequest {
+  decode(input: _m0.Reader | Uint8Array, length?: number): GetAttributesResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCheckSkuAvailabilityRequest();
+    const message = createBaseGetAttributesResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -222,14 +292,7 @@ export const CheckSkuAvailabilityRequest = {
             break;
           }
 
-          message.skuId = reader.string();
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.quantity = reader.int32();
+          message.attributes.push(AttributeDetail.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -241,165 +304,453 @@ export const CheckSkuAvailabilityRequest = {
   },
 };
 
-function createBaseCheckSkuAvailabilityResponse(): CheckSkuAvailabilityResponse {
-  return {
-    exists: false,
-    inStock: false,
-    availableStock: 0,
-    message: "",
-    productId: "",
-    skuCode: "",
-    price: 0,
-    productName: "",
-    description: "",
-    image: "",
-    brandId: "",
-    categoryId: "",
-    skuOptions: [],
-  };
+function createBaseGetAttributeOptionsRequest(): GetAttributeOptionsRequest {
+  return { attributeId: "" };
 }
 
-export const CheckSkuAvailabilityResponse = {
-  encode(message: CheckSkuAvailabilityResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.exists !== false) {
-      writer.uint32(8).bool(message.exists);
-    }
-    if (message.inStock !== false) {
-      writer.uint32(16).bool(message.inStock);
-    }
-    if (message.availableStock !== 0) {
-      writer.uint32(24).int32(message.availableStock);
-    }
-    if (message.message !== "") {
-      writer.uint32(34).string(message.message);
-    }
-    if (message.productId !== "") {
-      writer.uint32(42).string(message.productId);
-    }
-    if (message.skuCode !== "") {
-      writer.uint32(50).string(message.skuCode);
-    }
-    if (message.price !== 0) {
-      writer.uint32(57).double(message.price);
-    }
-    if (message.productName !== "") {
-      writer.uint32(66).string(message.productName);
-    }
-    if (message.description !== "") {
-      writer.uint32(74).string(message.description);
-    }
-    if (message.image !== "") {
-      writer.uint32(82).string(message.image);
-    }
-    if (message.brandId !== "") {
-      writer.uint32(90).string(message.brandId);
-    }
-    if (message.categoryId !== "") {
-      writer.uint32(98).string(message.categoryId);
-    }
-    for (const v of message.skuOptions) {
-      SkuOptionResponse.encode(v!, writer.uint32(106).fork()).ldelim();
+export const GetAttributeOptionsRequest = {
+  encode(message: GetAttributeOptionsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.attributeId !== "") {
+      writer.uint32(10).string(message.attributeId);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): CheckSkuAvailabilityResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): GetAttributeOptionsRequest {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCheckSkuAvailabilityResponse();
+    const message = createBaseGetAttributeOptionsRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.exists = reader.bool();
+          message.attributeId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetAttributeOptionsResponse(): GetAttributeOptionsResponse {
+  return { attributeId: "", attributeName: "", options: [] };
+}
+
+export const GetAttributeOptionsResponse = {
+  encode(message: GetAttributeOptionsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.attributeId !== "") {
+      writer.uint32(10).string(message.attributeId);
+    }
+    if (message.attributeName !== "") {
+      writer.uint32(18).string(message.attributeName);
+    }
+    for (const v of message.options) {
+      AttributeOption.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): GetAttributeOptionsResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAttributeOptionsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.attributeId = reader.string();
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.inStock = reader.bool();
+          message.attributeName = reader.string();
           continue;
         case 3:
-          if (tag !== 24) {
+          if (tag !== 26) {
             break;
           }
 
-          message.availableStock = reader.int32();
+          message.options.push(AttributeOption.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseAttributeOption(): AttributeOption {
+  return { id: "", value: "", description: "" };
+}
+
+export const AttributeOption = {
+  encode(message: AttributeOption, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    if (message.description !== "") {
+      writer.uint32(26).string(message.description);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): AttributeOption {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAttributeOption();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseAttributeDetail(): AttributeDetail {
+  return { id: "", name: "", description: "" };
+}
+
+export const AttributeDetail = {
+  encode(message: AttributeDetail, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.description !== "") {
+      writer.uint32(26).string(message.description);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): AttributeDetail {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAttributeDetail();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseBrandResponse(): BrandResponse {
+  return { id: "", name: "" };
+}
+
+export const BrandResponse = {
+  encode(message: BrandResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BrandResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBrandResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCategoryResponse(): CategoryResponse {
+  return { id: "", name: "", slug: "" };
+}
+
+export const CategoryResponse = {
+  encode(message: CategoryResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.slug !== "") {
+      writer.uint32(26).string(message.slug);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CategoryResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCategoryResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.slug = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseSkuResponse(): SkuResponse {
+  return { id: "", skuCode: "", price: 0, stock: 0, image: "", skuOptions: [], originalPrice: 0 };
+}
+
+export const SkuResponse = {
+  encode(message: SkuResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.skuCode !== "") {
+      writer.uint32(18).string(message.skuCode);
+    }
+    if (message.price !== 0) {
+      writer.uint32(25).double(message.price);
+    }
+    if (message.stock !== 0) {
+      writer.uint32(32).int32(message.stock);
+    }
+    if (message.image !== "") {
+      writer.uint32(42).string(message.image);
+    }
+    for (const v of message.skuOptions) {
+      SkuOptionResponse.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.originalPrice !== 0) {
+      writer.uint32(57).double(message.originalPrice);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SkuResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSkuResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.skuCode = reader.string();
+          continue;
+        case 3:
+          if (tag !== 25) {
+            break;
+          }
+
+          message.price = reader.double();
           continue;
         case 4:
-          if (tag !== 34) {
+          if (tag !== 32) {
             break;
           }
 
-          message.message = reader.string();
+          message.stock = reader.int32();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.productId = reader.string();
+          message.image = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.skuCode = reader.string();
+          message.skuOptions.push(SkuOptionResponse.decode(reader, reader.uint32()));
           continue;
         case 7:
           if (tag !== 57) {
             break;
           }
 
-          message.price = reader.double();
+          message.originalPrice = reader.double();
           continue;
-        case 8:
-          if (tag !== 66) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseSkuOptionResponse(): SkuOptionResponse {
+  return { attributeOptionId: "", attributeOptionValue: "" };
+}
+
+export const SkuOptionResponse = {
+  encode(message: SkuOptionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.attributeOptionId !== "") {
+      writer.uint32(10).string(message.attributeOptionId);
+    }
+    if (message.attributeOptionValue !== "") {
+      writer.uint32(18).string(message.attributeOptionValue);
+    }
+    if (message.attribute !== undefined) {
+      AttributeDetail.encode(message.attribute, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SkuOptionResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSkuOptionResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
             break;
           }
 
-          message.productName = reader.string();
+          message.attributeOptionId = reader.string();
           continue;
-        case 9:
-          if (tag !== 74) {
+        case 2:
+          if (tag !== 18) {
             break;
           }
 
-          message.description = reader.string();
+          message.attributeOptionValue = reader.string();
           continue;
-        case 10:
-          if (tag !== 82) {
+        case 3:
+          if (tag !== 26) {
             break;
           }
 
-          message.image = reader.string();
-          continue;
-        case 11:
-          if (tag !== 90) {
-            break;
-          }
-
-          message.brandId = reader.string();
-          continue;
-        case 12:
-          if (tag !== 98) {
-            break;
-          }
-
-          message.categoryId = reader.string();
-          continue;
-        case 13:
-          if (tag !== 106) {
-            break;
-          }
-
-          message.skuOptions.push(SkuOptionResponse.decode(reader, reader.uint32()));
+          message.attribute = AttributeDetail.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -412,7 +763,7 @@ export const CheckSkuAvailabilityResponse = {
 };
 
 function createBaseCreateProductRequest(): CreateProductRequest {
-  return { name: "", description: "", brandId: "", categoryId: "", skus: [] };
+  return { name: "", description: "", brandId: "", categoryId: "", skus: [], originalPrice: 0 };
 }
 
 export const CreateProductRequest = {
@@ -431,6 +782,9 @@ export const CreateProductRequest = {
     }
     for (const v of message.skus) {
       CreateSkuInput.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.originalPrice !== 0) {
+      writer.uint32(49).double(message.originalPrice);
     }
     return writer;
   },
@@ -476,6 +830,13 @@ export const CreateProductRequest = {
           }
 
           message.skus.push(CreateSkuInput.decode(reader, reader.uint32()));
+          continue;
+        case 6:
+          if (tag !== 49) {
+            break;
+          }
+
+          message.originalPrice = reader.double();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -682,7 +1043,7 @@ export const GetProductRequest = {
 };
 
 function createBaseGetProductResponse(): GetProductResponse {
-  return { id: "", name: "", description: "", brandId: "", categoryId: "", skus: [] };
+  return { id: "", name: "", description: "", skus: [], originalPrice: 0 };
 }
 
 export const GetProductResponse = {
@@ -696,14 +1057,17 @@ export const GetProductResponse = {
     if (message.description !== "") {
       writer.uint32(26).string(message.description);
     }
-    if (message.brandId !== "") {
-      writer.uint32(34).string(message.brandId);
+    if (message.brand !== undefined) {
+      BrandResponse.encode(message.brand, writer.uint32(34).fork()).ldelim();
     }
-    if (message.categoryId !== "") {
-      writer.uint32(42).string(message.categoryId);
+    if (message.category !== undefined) {
+      CategoryResponse.encode(message.category, writer.uint32(42).fork()).ldelim();
     }
     for (const v of message.skus) {
       SkuResponse.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.originalPrice !== 0) {
+      writer.uint32(57).double(message.originalPrice);
     }
     return writer;
   },
@@ -741,14 +1105,14 @@ export const GetProductResponse = {
             break;
           }
 
-          message.brandId = reader.string();
+          message.brand = BrandResponse.decode(reader, reader.uint32());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.categoryId = reader.string();
+          message.category = CategoryResponse.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
@@ -756,6 +1120,13 @@ export const GetProductResponse = {
           }
 
           message.skus.push(SkuResponse.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 57) {
+            break;
+          }
+
+          message.originalPrice = reader.double();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -803,80 +1174,8 @@ export const GetProductSkuRequest = {
   },
 };
 
-function createBaseListSkuRequest(): ListSkuRequest {
-  return { skuIds: [] };
-}
-
-export const ListSkuRequest = {
-  encode(message: ListSkuRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.skuIds) {
-      writer.uint32(10).string(v!);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListSkuRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListSkuRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.skuIds.push(reader.string());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseListSkuResponse(): ListSkuResponse {
-  return { skus: [] };
-}
-
-export const ListSkuResponse = {
-  encode(message: ListSkuResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.skus) {
-      SkuResponse.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListSkuResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListSkuResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.skus.push(SkuResponse.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
 function createBaseGetProductSkuResponse(): GetProductSkuResponse {
-  return { id: "", name: "", description: "", brandId: "", categoryId: "", skus: [] };
+  return { id: "", name: "", description: "", skus: [] };
 }
 
 export const GetProductSkuResponse = {
@@ -890,11 +1189,11 @@ export const GetProductSkuResponse = {
     if (message.description !== "") {
       writer.uint32(26).string(message.description);
     }
-    if (message.brandId !== "") {
-      writer.uint32(34).string(message.brandId);
+    if (message.brand !== undefined) {
+      BrandResponse.encode(message.brand, writer.uint32(34).fork()).ldelim();
     }
-    if (message.categoryId !== "") {
-      writer.uint32(42).string(message.categoryId);
+    if (message.category !== undefined) {
+      CategoryResponse.encode(message.category, writer.uint32(42).fork()).ldelim();
     }
     for (const v of message.skus) {
       SkuResponse.encode(v!, writer.uint32(50).fork()).ldelim();
@@ -935,14 +1234,14 @@ export const GetProductSkuResponse = {
             break;
           }
 
-          message.brandId = reader.string();
+          message.brand = BrandResponse.decode(reader, reader.uint32());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.categoryId = reader.string();
+          message.category = CategoryResponse.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
@@ -962,7 +1261,7 @@ export const GetProductSkuResponse = {
 };
 
 function createBaseUpdateProductRequest(): UpdateProductRequest {
-  return { id: "", name: "", description: "", brandId: "", categoryId: "", skus: [] };
+  return { id: "", name: "", description: "", brandId: "", categoryId: "", skus: [], originalPrice: 0 };
 }
 
 export const UpdateProductRequest = {
@@ -984,6 +1283,9 @@ export const UpdateProductRequest = {
     }
     for (const v of message.skus) {
       CreateSkuInput.encode(v!, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.originalPrice !== 0) {
+      writer.uint32(57).double(message.originalPrice);
     }
     return writer;
   },
@@ -1036,6 +1338,13 @@ export const UpdateProductRequest = {
           }
 
           message.skus.push(CreateSkuInput.decode(reader, reader.uint32()));
+          continue;
+        case 7:
+          if (tag !== 57) {
+            break;
+          }
+
+          message.originalPrice = reader.double();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1156,7 +1465,7 @@ export const DeleteProductResponse = {
 };
 
 function createBaseGetAllProductsRequest(): GetAllProductsRequest {
-  return { page: 0, limit: 0, keyword: "", brandId: "", categoryId: "", sort: "" };
+  return { page: 0, limit: 0, keyword: "", brandId: "", categoryId: "", sortField: 0, sortOrder: 0 };
 }
 
 export const GetAllProductsRequest = {
@@ -1176,8 +1485,17 @@ export const GetAllProductsRequest = {
     if (message.categoryId !== "") {
       writer.uint32(42).string(message.categoryId);
     }
-    if (message.sort !== "") {
-      writer.uint32(50).string(message.sort);
+    if (message.sortField !== 0) {
+      writer.uint32(48).int32(message.sortField);
+    }
+    if (message.sortOrder !== 0) {
+      writer.uint32(56).int32(message.sortOrder);
+    }
+    if (message.minPrice !== undefined) {
+      writer.uint32(65).double(message.minPrice);
+    }
+    if (message.maxPrice !== undefined) {
+      writer.uint32(73).double(message.maxPrice);
     }
     return writer;
   },
@@ -1225,11 +1543,32 @@ export const GetAllProductsRequest = {
           message.categoryId = reader.string();
           continue;
         case 6:
-          if (tag !== 50) {
+          if (tag !== 48) {
             break;
           }
 
-          message.sort = reader.string();
+          message.sortField = reader.int32() as any;
+          continue;
+        case 7:
+          if (tag !== 56) {
+            break;
+          }
+
+          message.sortOrder = reader.int32() as any;
+          continue;
+        case 8:
+          if (tag !== 65) {
+            break;
+          }
+
+          message.minPrice = reader.double();
+          continue;
+        case 9:
+          if (tag !== 73) {
+            break;
+          }
+
+          message.maxPrice = reader.double();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1306,204 +1645,6 @@ export const GetAllProductsResponse = {
           }
 
           message.totalPages = reader.int32();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseSkuResponse(): SkuResponse {
-  return { id: "", skuCode: "", price: 0, stock: 0, image: "", skuOptions: [] };
-}
-
-export const SkuResponse = {
-  encode(message: SkuResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.skuCode !== "") {
-      writer.uint32(18).string(message.skuCode);
-    }
-    if (message.price !== 0) {
-      writer.uint32(25).double(message.price);
-    }
-    if (message.stock !== 0) {
-      writer.uint32(32).int32(message.stock);
-    }
-    if (message.image !== "") {
-      writer.uint32(42).string(message.image);
-    }
-    for (const v of message.skuOptions) {
-      SkuOptionResponse.encode(v!, writer.uint32(50).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): SkuResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSkuResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.skuCode = reader.string();
-          continue;
-        case 3:
-          if (tag !== 25) {
-            break;
-          }
-
-          message.price = reader.double();
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.stock = reader.int32();
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.image = reader.string();
-          continue;
-        case 6:
-          if (tag !== 50) {
-            break;
-          }
-
-          message.skuOptions.push(SkuOptionResponse.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseSkuOptionResponse(): SkuOptionResponse {
-  return { attributeOptionId: "", attributeOptionValue: "" };
-}
-
-export const SkuOptionResponse = {
-  encode(message: SkuOptionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.attributeOptionId !== "") {
-      writer.uint32(10).string(message.attributeOptionId);
-    }
-    if (message.attributeOptionValue !== "") {
-      writer.uint32(18).string(message.attributeOptionValue);
-    }
-    if (message.attribute !== undefined) {
-      AttributeDetail.encode(message.attribute, writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): SkuOptionResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSkuOptionResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.attributeOptionId = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.attributeOptionValue = reader.string();
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.attribute = AttributeDetail.decode(reader, reader.uint32());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseAttributeDetail(): AttributeDetail {
-  return { id: "", name: "", description: "" };
-}
-
-export const AttributeDetail = {
-  encode(message: AttributeDetail, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.name !== "") {
-      writer.uint32(18).string(message.name);
-    }
-    if (message.description !== "") {
-      writer.uint32(26).string(message.description);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): AttributeDetail {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAttributeDetail();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.description = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1622,8 +1763,6 @@ function createBaseSkuValidationResult(): SkuValidationResult {
     productId: "",
     name: "",
     description: "",
-    brandId: "",
-    categoryId: "",
     skuId: "",
     skuCode: "",
     price: 0,
@@ -1648,11 +1787,11 @@ export const SkuValidationResult = {
     if (message.description !== "") {
       writer.uint32(26).string(message.description);
     }
-    if (message.brandId !== "") {
-      writer.uint32(34).string(message.brandId);
+    if (message.brand !== undefined) {
+      BrandResponse.encode(message.brand, writer.uint32(34).fork()).ldelim();
     }
-    if (message.categoryId !== "") {
-      writer.uint32(42).string(message.categoryId);
+    if (message.category !== undefined) {
+      CategoryResponse.encode(message.category, writer.uint32(42).fork()).ldelim();
     }
     if (message.skuId !== "") {
       writer.uint32(50).string(message.skuId);
@@ -1720,14 +1859,14 @@ export const SkuValidationResult = {
             break;
           }
 
-          message.brandId = reader.string();
+          message.brand = BrandResponse.decode(reader, reader.uint32());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.categoryId = reader.string();
+          message.category = CategoryResponse.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
@@ -1855,6 +1994,220 @@ export const ValidateSkuInputResponse = {
   },
 };
 
+function createBaseCheckSkuAvailabilityRequest(): CheckSkuAvailabilityRequest {
+  return { skuId: "", quantity: 0 };
+}
+
+export const CheckSkuAvailabilityRequest = {
+  encode(message: CheckSkuAvailabilityRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.skuId !== "") {
+      writer.uint32(10).string(message.skuId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(16).int32(message.quantity);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CheckSkuAvailabilityRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCheckSkuAvailabilityRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.skuId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCheckSkuAvailabilityResponse(): CheckSkuAvailabilityResponse {
+  return {
+    exists: false,
+    inStock: false,
+    availableStock: 0,
+    message: "",
+    productId: "",
+    skuCode: "",
+    price: 0,
+    productName: "",
+    description: "",
+    image: "",
+    skuOptions: [],
+  };
+}
+
+export const CheckSkuAvailabilityResponse = {
+  encode(message: CheckSkuAvailabilityResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.exists !== false) {
+      writer.uint32(8).bool(message.exists);
+    }
+    if (message.inStock !== false) {
+      writer.uint32(16).bool(message.inStock);
+    }
+    if (message.availableStock !== 0) {
+      writer.uint32(24).int32(message.availableStock);
+    }
+    if (message.message !== "") {
+      writer.uint32(34).string(message.message);
+    }
+    if (message.productId !== "") {
+      writer.uint32(42).string(message.productId);
+    }
+    if (message.skuCode !== "") {
+      writer.uint32(50).string(message.skuCode);
+    }
+    if (message.price !== 0) {
+      writer.uint32(57).double(message.price);
+    }
+    if (message.productName !== "") {
+      writer.uint32(66).string(message.productName);
+    }
+    if (message.description !== "") {
+      writer.uint32(74).string(message.description);
+    }
+    if (message.image !== "") {
+      writer.uint32(82).string(message.image);
+    }
+    if (message.brand !== undefined) {
+      BrandResponse.encode(message.brand, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.category !== undefined) {
+      CategoryResponse.encode(message.category, writer.uint32(98).fork()).ldelim();
+    }
+    for (const v of message.skuOptions) {
+      SkuOptionResponse.encode(v!, writer.uint32(106).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CheckSkuAvailabilityResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCheckSkuAvailabilityResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.exists = reader.bool();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.inStock = reader.bool();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.availableStock = reader.int32();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.skuCode = reader.string();
+          continue;
+        case 7:
+          if (tag !== 57) {
+            break;
+          }
+
+          message.price = reader.double();
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.productName = reader.string();
+          continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.brand = BrandResponse.decode(reader, reader.uint32());
+          continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.category = CategoryResponse.decode(reader, reader.uint32());
+          continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.skuOptions.push(SkuOptionResponse.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 export interface ProductServiceClient {
   createProduct(request: CreateProductRequest, metadata: Metadata, ...rest: any): Observable<CreateProductResponse>;
 
@@ -1877,6 +2230,14 @@ export interface ProductServiceClient {
     metadata: Metadata,
     ...rest: any
   ): Observable<CheckSkuAvailabilityResponse>;
+
+  getAttributes(request: GetAttributesRequest, metadata: Metadata, ...rest: any): Observable<GetAttributesResponse>;
+
+  getAttributeOptions(
+    request: GetAttributeOptionsRequest,
+    metadata: Metadata,
+    ...rest: any
+  ): Observable<GetAttributeOptionsResponse>;
 }
 
 export interface ProductServiceController {
@@ -1921,6 +2282,18 @@ export interface ProductServiceController {
     metadata: Metadata,
     ...rest: any
   ): Promise<CheckSkuAvailabilityResponse> | Observable<CheckSkuAvailabilityResponse> | CheckSkuAvailabilityResponse;
+
+  getAttributes(
+    request: GetAttributesRequest,
+    metadata: Metadata,
+    ...rest: any
+  ): Promise<GetAttributesResponse> | Observable<GetAttributesResponse> | GetAttributesResponse;
+
+  getAttributeOptions(
+    request: GetAttributeOptionsRequest,
+    metadata: Metadata,
+    ...rest: any
+  ): Promise<GetAttributeOptionsResponse> | Observable<GetAttributeOptionsResponse> | GetAttributeOptionsResponse;
 }
 
 export function ProductServiceControllerMethods() {
@@ -1933,6 +2306,8 @@ export function ProductServiceControllerMethods() {
       "updateProduct",
       "deleteProduct",
       "existingSku",
+      "getAttributes",
+      "getAttributeOptions",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -2016,6 +2391,26 @@ export const ProductServiceService = {
       Buffer.from(CheckSkuAvailabilityResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => CheckSkuAvailabilityResponse.decode(value),
   },
+  getAttributes: {
+    path: "/product.ProductService/GetAttributes",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetAttributesRequest) => Buffer.from(GetAttributesRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetAttributesRequest.decode(value),
+    responseSerialize: (value: GetAttributesResponse) => Buffer.from(GetAttributesResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetAttributesResponse.decode(value),
+  },
+  getAttributeOptions: {
+    path: "/product.ProductService/GetAttributeOptions",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetAttributeOptionsRequest) =>
+      Buffer.from(GetAttributeOptionsRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetAttributeOptionsRequest.decode(value),
+    responseSerialize: (value: GetAttributeOptionsResponse) =>
+      Buffer.from(GetAttributeOptionsResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetAttributeOptionsResponse.decode(value),
+  },
 } as const;
 
 export interface ProductServiceServer extends UntypedServiceImplementation {
@@ -2026,4 +2421,6 @@ export interface ProductServiceServer extends UntypedServiceImplementation {
   updateProduct: handleUnaryCall<UpdateProductRequest, UpdateProductResponse>;
   deleteProduct: handleUnaryCall<DeleteProductRequest, DeleteProductResponse>;
   existingSku: handleUnaryCall<CheckSkuAvailabilityRequest, CheckSkuAvailabilityResponse>;
+  getAttributes: handleUnaryCall<GetAttributesRequest, GetAttributesResponse>;
+  getAttributeOptions: handleUnaryCall<GetAttributeOptionsRequest, GetAttributeOptionsResponse>;
 }

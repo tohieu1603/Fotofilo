@@ -28,5 +28,6 @@ export class CreateOrderCommand {
     public readonly currency?: string,
     public readonly shippingAddressId?: string,
     public readonly billingAddressId?: string,
+    public readonly paymentMethod?: 'COD' | 'MOMO' | 'VNPAY' | 'STRIPE',
   ) {}
 }

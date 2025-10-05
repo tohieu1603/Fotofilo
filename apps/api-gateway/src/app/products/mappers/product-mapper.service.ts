@@ -11,15 +11,23 @@ export class ProductMapperService {
   fromProtoToDto(grpcProduct: Product.GetProductResponse): ProductDto {
     const skus = this.mapSkus(grpcProduct.skus);
     const firstSkuPrice = skus.length > 0 ? skus[0].price : 0;
-    
+
     return {
       id: grpcProduct.id || '',
       name: grpcProduct.name || '',
       description: grpcProduct.description || '',
       slug: grpcProduct.name?.toLowerCase().replace(/\s+/g, '-') || '',
       price: firstSkuPrice,
-      brandId: grpcProduct.brandId || '',
-      categoryId: grpcProduct.categoryId || '',
+      originalPrice: grpcProduct.originalPrice,
+      brand: grpcProduct.brand ? {
+        id: grpcProduct.brand.id,
+        name: grpcProduct.brand.name,
+      } : undefined,
+      category: grpcProduct.category ? {
+        id: grpcProduct.category.id,
+        name: grpcProduct.category.name,
+        slug: grpcProduct.category.slug,
+      } : undefined,
       skus,
       images: [],
       attributes: this.buildAttributeSummary(skus),
@@ -44,8 +52,8 @@ export class ProductMapperService {
       name,
       description: '',
       price: 0,
-      brandId: '',
-      categoryId: '',
+      brand: undefined,
+      category: undefined,
       skus: [],
       images: [],
       attributes: {},

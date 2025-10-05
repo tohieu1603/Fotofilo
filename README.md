@@ -1,8 +1,8 @@
 # NestCM - Microservices Architecture
 
-NestCM là một hệ thống microservices được xây dựng bằng NestJS và NX Monorepo, áp dụng kiến trúc "Database per Service" với giao tiếp qua gRPC, Kafka và Redis.
+NestCM là một hệ thống microservices được xây dựng bằng NestJS và NX Monorepo, áp dụng kiến trúc "Database Service" với giao tiếp qua gRPC, Kafka và Redis.
 
-## 🏗️ Kiến trúc hệ thống
+## Kiến trúc hệ thống
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -27,7 +27,7 @@ NestCM là một hệ thống microservices được xây dựng bằng NestJS v
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🚀 Các Services
+## Các Services
 
 ### 1. **API Gateway** (Port: 3000)
 - **Vai trò**: Entry point, routing, authentication, rate limiting
@@ -64,7 +64,7 @@ NestCM là một hệ thống microservices được xây dựng bằng NestJS v
 - **Database**: PostgreSQL (Port: 5436)
 - **Giao tiếp**: gRPC với API Gateway, Redis cho JWT tokens
 
-## 🔄 Luồng hoạt động chi tiết
+## Luồng hoạt động chi tiết
 
 ### **1. Luồng CRUD Product**
 
@@ -172,45 +172,34 @@ sequenceDiagram
 
 ## 🛠️ Công nghệ và khi nào sử dụng
 
-### **gRPC - Khi nào dùng:**
-✅ **Synchronous communication** giữa services  
-✅ **Real-time responses** cần thiết  
-✅ **Service-to-service calls** với low latency  
-✅ **Contract-first development** với protobuf  
-✅ **Bidirectional streaming** (nếu cần)  
+### **gRPC - Khi nào dùng:** **Synchronous communication** giữa services   **Real-time responses** cần thiết   **Service-to-service calls** với low latency   **Contract-first development** với protobuf   **Bidirectional streaming** (nếu cần)  
 
-❌ **Không dùng cho:**
+ **Không dùng cho:**
 - Event-driven architecture
 - Async processing
 - Broadcast messages
 
-### **Kafka - Khi nào dùng:**
-✅ **Event-driven architecture**  
-✅ **Async processing**  
-✅ **Message ordering** quan trọng  
-✅ **High throughput** messaging  
-✅ **Event sourcing** và audit trail  
-✅ **Decoupling** services  
+### **Kafka - Khi nào dùng:** **Event-driven architecture**   **Async processing**   **Message ordering** quan trọng   **High throughput** messaging   **Event sourcing** và audit trail   **Decoupling** services  
 
-❌ **Không dùng cho:**
+ **Không dùng cho:**
 - Real-time responses
 - Simple request-reply patterns
 - Low latency requirements
 
-### **Redis - Khi nào dùng:**
-✅ **Caching** (session, product cache)  
-✅ **High-frequency reads**  
-✅ **Temporary data storage**  
-✅ **Distributed locking**  
-✅ **Rate limiting**  
-✅ **Real-time counters**  
+## **Redis - Khi nào dùng:**
+ **Caching** (session, product cache)  
+ **High-frequency reads**  
+ **Temporary data storage**  
+ **Distributed locking**  
+ **Rate limiting**  
+ **Real-time counters**  
 
-❌ **Không dùng cho:**
+ **Không dùng cho:**
 - Persistent data storage
 - Complex queries
 - Large data sets
 
-## 📊 Database per Service Pattern
+## Database per Service Pattern
 
 ```
 Service          │ Database │ Port │ Purpose
@@ -223,7 +212,7 @@ Order            │ PostgreSQL│ 5435 │ Orders, order items
 User             │ PostgreSQL│ 5436 │ Users, profiles, auth
 ```
 
-## 🚀 Cách chạy
+##  Cách chạy
 
 ### 1. **Cài đặt dependencies:**
 ```bash
@@ -289,28 +278,28 @@ GRPC_HOST=0.0.0.0
 GRPC_PORT=50051
 ```
 
-## 📈 Monitoring và Logging
+##  Monitoring và Logging
 
 - **Prometheus**: Metrics collection
 - **Grafana**: Visualization dashboard
 - **Jaeger**: Distributed tracing
 - **ELK Stack**: Log aggregation
 
-## 🔒 Security
+## Security
 
 - **JWT Authentication** cho API Gateway
 - **gRPC TLS** cho service-to-service communication
 - **API Rate Limiting** với Redis
 - **Input Validation** với class-validator
 
-## 📚 References
+## References
 
 - [NestJS Microservices](https://docs.nestjs.com/microservices/basics)
 - [gRPC with NestJS](https://docs.nestjs.com/microservices/grpc)
 - [Kafka Integration](https://docs.nestjs.com/microservices/kafka)
 - [Redis Integration](https://docs.nestjs.com/microservices/redis)
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork repository
 2. Create feature branch
@@ -318,6 +307,6 @@ GRPC_PORT=50051
 4. Push to branch
 5. Create Pull Request
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details

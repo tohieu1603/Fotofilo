@@ -1,8 +1,8 @@
 {
   "run": {
-    "command": "nx run order-service:build:development",
-    "startTime": "2025-09-30T15:01:31.790Z",
-    "endTime": "2025-09-30T15:01:44.063Z",
+    "command": "nx run api-gateway:build:development",
+    "startTime": "2025-10-04T15:15:02.409Z",
+    "endTime": "2025-10-04T15:15:13.625Z",
     "inner": false
   },
   "tasks": [
@@ -10,31 +10,20 @@
       "taskId": "proto:build:development",
       "target": "build",
       "projectName": "proto",
-      "hash": "3973528222257006543",
-      "startTime": "2025-09-30T15:01:31.823Z",
-      "endTime": "2025-09-30T15:01:31.862Z",
+      "hash": "15144184079189489496",
+      "startTime": "2025-10-04T15:15:02.429Z",
+      "endTime": "2025-10-04T15:15:02.446Z",
       "params": "",
       "cacheStatus": "local-cache-hit",
       "status": 0
     },
     {
-      "taskId": "database:build",
+      "taskId": "api-gateway:build:development",
       "target": "build",
-      "projectName": "database",
-      "hash": "15859544471656410368",
-      "startTime": "2025-09-30T15:01:31.823Z",
-      "endTime": "2025-09-30T15:01:31.862Z",
-      "params": "",
-      "cacheStatus": "local-cache-hit",
-      "status": 0
-    },
-    {
-      "taskId": "order-service:build:development",
-      "target": "build",
-      "projectName": "order-service",
-      "hash": "1392902822052981921",
-      "startTime": "2025-09-30T15:01:31.866Z",
-      "endTime": "2025-09-30T15:01:44.048Z",
+      "projectName": "api-gateway",
+      "hash": "6084553970553109334",
+      "startTime": "2025-10-04T15:15:02.449Z",
+      "endTime": "2025-10-04T15:15:13.611Z",
       "params": "",
       "cacheStatus": "cache-miss",
       "status": 0

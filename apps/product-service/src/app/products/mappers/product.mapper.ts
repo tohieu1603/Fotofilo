@@ -7,8 +7,16 @@ export class ProductMapper {
       id: product.id,
       name: product.name,
       description: product.description,
-      brandId: product.brandId,
-      categoryId: product.categoryId,
+      originalPrice: product.originalPrice ?? 0,
+      brand: product.brand ? {
+        id: product.brand.id,
+        name: product.brand.name,
+      } : undefined,
+      category: product.category ? {
+        id: product.category.id,
+        name: product.category.name,
+        slug: product.category.slug,
+      } : undefined,
       skus: product.skus?.map(
         (sku): ProductProto.SkuResponse => ({
           id: sku.id,
@@ -16,6 +24,7 @@ export class ProductMapper {
           price: sku.price,
           image: sku.image,
           stock: sku.stock,
+          originalPrice: 0,
           skuOptions: sku.skuOptions?.map(
             (opt): ProductProto.SkuOptionResponse => ({
               attributeOptionId: opt.attributeOption.id,

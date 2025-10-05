@@ -1,0 +1,175 @@
+[1m[33mNX Daemon is not running. Node process will not restart automatically after file changes.[39m[22m
+
+[0m[7m[1m[36m NX [39m[22m[27m[0m  [36mRunning target [1mbuild[22m for project api-gateway and [1m1[22m task it depends on:[39m
+
+
+
+[2m> [22m[2mnx run[22m proto:build:development  [2m[local cache][22m
+
+
+[2m> [22m[2mnx run[22m api-gateway:build:development  [2m[local cache][22m
+
+[2m> [22mwebpack-cli build --node-env=development
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 511 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+webpack compiled [1m[32msuccessfully[39m[22m (2f6487d2f16daa4e)
+
+
+
+[0m[7m[1m[32m NX [39m[22m[27m[0m  [32mSuccessfully ran target [1mbuild[22m for project api-gateway and [1m1[22m task it depends on[39m
+
+[2mNx read the output from the cache instead of running the command for 2 out of 2 tasks.[22m
+
+[1m[31mDebugger listening on ws://localhost:9229/71d7d287-de97-418c-9dfa-d2cfead620e0[39m[22m
+[1m[31mDebugger listening on ws://localhost:9229/71d7d287-de97-418c-9dfa-d2cfead620e0[39m[22m
+[1m[31mFor help, see: https://nodejs.org/en/docs/inspector[39m[22m
+[1m[31m[39m[22m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +20ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHttpModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mInventoryModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRecommendationsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mProductController {/api/products}:[39m[38;5;3m +55ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products, POST} route[39m[38;5;3m +4ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products/attributes, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products/attributes/:attributeId/options, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products/:id, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products/:id, PATCH} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/products/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/register, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/refresh, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/validate, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/admin-action, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/admin-or-manager-delete, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCartController {/api/carts}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/carts, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/carts, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/carts/my-cart, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/carts/:cartId, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mBrandController {/api/brands}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/brands, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/brands, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/brands/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/brands/:id, PUT} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/brands/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCategoryController {/api/categories}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/categories, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/categories, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/categories/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/categories/:id, PUT} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/categories/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mOrderController {/api/orders}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/orders, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/orders/my-orders, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/orders/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/orders/number/:orderNumber, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAddressController {/api/addresses}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/addresses/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/addresses, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/addresses/:id, PUT} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/addresses/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/addresses/my-addresses, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPaymentController {/api/payments}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/payments/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/payments/order/:orderId, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/payments/callback/momo, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/register, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/validate, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/admin-action, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/admin-or-manager-delete, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInventoryController {/api/inventory}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/inventory/stock/:skuCode, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/inventory/logs/:skuCode, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/inventory/stock/check, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/inventory/stock/import, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/inventory/stock/adjust, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRecommendationsController {/api/recommendations}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/recommendations, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/recommendations/me/history, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/recommendations/popular, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +66ms[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [32m🚀 Server is running on http://localhost:3000[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:48:18 PM [32m    LOG[39m [32m📖 Swagger docs: http://localhost:3000/docs[39m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:50:56 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31m[31mgRPC Exception: Bad Request Exception[39m[31m[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:50:56 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31mObject(5) {[39m[22m
+[1m[31m  code: [90mundefined[39m[31m,[39m[22m
+[1m[31m  details: [90mundefined[39m[31m,[39m[22m
+[1m[31m  metadata: [90mundefined[39m[31m,[39m[22m
+[1m[31m  path: [32m'/api/products'[39m[31m,[39m[22m
+[1m[31m  method: [32m'POST'[39m[31m[39m[22m
+[1m[31m}[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:51:39 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31m[31mgRPC Exception: 3 INVALID_ARGUMENT: SKU codes already exist: ABCDEAFFF, ABCDESAFDG. Please use unique SKU codes.[39m[31m[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:51:39 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31mObject(5) {[39m[22m
+[1m[31m  code: [33m3[39m[31m,[39m[22m
+[1m[31m  details: [32m'SKU codes already exist: ABCDEAFFF, ABCDESAFDG. Please use unique SKU codes.'[39m[31m,[39m[22m
+[1m[31m  metadata: Metadata {[39m[22m
+[1m[31m    internalRepr: Map(2) {[39m[22m
+[1m[31m      [32m'content-type'[39m[31m => [[39m[22m
+[1m[31m        [32m'application/grpc+proto'[39m[31m[39m[22m
+[1m[31m      ],[39m[22m
+[1m[31m      [32m'date'[39m[31m => [[39m[22m
+[1m[31m        [32m'Thu, 02 Oct 2025 14:51:39 GMT'[39m[31m[39m[22m
+[1m[31m      ][39m[22m
+[1m[31m    },[39m[22m
+[1m[31m    opaqueData: Map(0) {},[39m[22m
+[1m[31m    options: {}[39m[22m
+[1m[31m  },[39m[22m
+[1m[31m  path: [32m'/api/products'[39m[31m,[39m[22m
+[1m[31m  method: [32m'POST'[39m[31m[39m[22m
+[1m[31m}[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:52:21 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31m[31mgRPC Exception: 2 UNKNOWN: Internal server error[39m[31m[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:52:21 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31mObject(5) {[39m[22m
+[1m[31m  code: [33m2[39m[31m,[39m[22m
+[1m[31m  details: [32m'Internal server error'[39m[31m,[39m[22m
+[1m[31m  metadata: Metadata {[39m[22m
+[1m[31m    internalRepr: Map(2) {[39m[22m
+[1m[31m      [32m'content-type'[39m[31m => [[39m[22m
+[1m[31m        [32m'application/grpc+proto'[39m[31m[39m[22m
+[1m[31m      ],[39m[22m
+[1m[31m      [32m'date'[39m[31m => [[39m[22m
+[1m[31m        [32m'Thu, 02 Oct 2025 14:52:21 GMT'[39m[31m[39m[22m
+[1m[31m      ][39m[22m
+[1m[31m    },[39m[22m
+[1m[31m    opaqueData: Map(0) {},[39m[22m
+[1m[31m    options: {}[39m[22m
+[1m[31m  },[39m[22m
+[1m[31m  path: [32m'/api/products'[39m[31m,[39m[22m
+[1m[31m  method: [32m'POST'[39m[31m[39m[22m
+[1m[31m}[39m[22m
+[1m[31m[39m[22m
+[32m[Nest] 13004  - [39m10/02/2025, 9:56:56 PM [32m    LOG[39m [38;5;3m[BrandController] [39m[32m🔍 [BrandController] Getting all brands[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:56:56 PM [32m    LOG[39m [38;5;3m[BrandController] [39m[32m✅ [BrandController] Found 4 brands[39m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:57:08 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31m[31mgRPC Exception: Cannot read properties of undefined (reading 'name')[39m[31m[39m[22m
+[1m[31m[39m[22m
+[1m[31m[31m[Nest] 13004  - [39m[31m10/02/2025, 9:57:08 PM [31m  ERROR[39m[31m [38;5;3m[GrpcClientExceptionFilter] [39m[31mObject(5) {[39m[22m
+[1m[31m  code: [90mundefined[39m[31m,[39m[22m
+[1m[31m  details: [90mundefined[39m[31m,[39m[22m
+[1m[31m  metadata: [90mundefined[39m[31m,[39m[22m
+[1m[31m  path: [32m'/api/categories'[39m[31m,[39m[22m
+[1m[31m  method: [32m'POST'[39m[31m[39m[22m
+[1m[31m}[39m[22m
+[1m[31m[39m[22m
+[32m[Nest] 13004  - [39m10/02/2025, 9:57:15 PM [32m    LOG[39m [38;5;3m[CategoryController] [39m[32m🔍 [CategoryController] Getting all categories[39m
+[32m[Nest] 13004  - [39m10/02/2025, 9:57:15 PM [32m    LOG[39m [38;5;3m[CategoryController] [39m[32m✅ [CategoryController] Found 3 categories[39m
+
+[7m[1m[36m NX [39m[22m[27m [1mProcess exited with code 3221225786, waiting for changes to restart...[22m
+

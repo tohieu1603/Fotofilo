@@ -6,10 +6,12 @@ import { OrderInfrastructureModule } from '../infrastructure/order-infrastructur
 import { ProductServiceClient } from '../infrastructure/clients/product-service.client';
 import { AddressServiceClient } from '../infrastructure/clients/address-service.client';
 import { InventoryServiceClient } from '../infrastructure/clients/inventory-service.client';
+import { PaymentServiceClient } from '../infrastructure/clients/payment-service.client';
 import { OrderResponseMapper } from '../application/mappers/order-response.mapper';
 import { OrderController } from './order.controller';
 import { CommonModule } from '@nestcm/common';
 import { KafkaService } from '../../common/kafka/kafka.service';
+import { PaymentEventConsumer } from '../infrastructure/kafka/payment-event.consumer';
 
 // Import Command Handlers
 import { CreateOrderHandler } from '../application/handlers/create-order.handler';
@@ -80,6 +82,15 @@ const QueryHandlers = [
         },
       },
       {
+        name: 'PAYMENT_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'payment',
+          protoPath: resolveProtoPath('proto/payment.proto'),
+          url: process.env.PAYMENT_SERVICE_GRPC_URL || '0.0.0.0:50059',
+        },
+      },
+      {
         name: 'KAFKA_SERVICE',
         transport: Transport.KAFKA,
         options: {
@@ -99,8 +110,10 @@ const QueryHandlers = [
     ProductServiceClient,
     AddressServiceClient,
     InventoryServiceClient,
+    PaymentServiceClient,
     OrderResponseMapper,
     KafkaService,
+    PaymentEventConsumer,
     ...CommandHandlers,
     ...QueryHandlers,
   ],

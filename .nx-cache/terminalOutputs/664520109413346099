@@ -1,0 +1,51 @@
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 417 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/cart/infrastructure/clients/product-service.client.ts:[32m[1m149:27[22m[39m[1m[39m[22m
+[90mTS2551: [39mProperty 'brandId' does not exist on type 'CheckSkuAvailabilityResponse'. Did you mean 'brand'?
+  [0m [90m 147 |[39m       name[33m:[39m availability[33m.[39mproductName [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 148 |[39m       description[33m:[39m availability[33m.[39mdescription [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+  [31m[1m>[22m[39m[90m 149 |[39m       brand[33m:[39m availability[33m.[39mbrandId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m     |[39m                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 150 |[39m       category[33m:[39m availability[33m.[39mcategoryId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 151 |[39m       attributes[33m,[39m
+   [90m 152 |[39m       variants[33m:[39m { [33m...[39mattributes }[33m,[39m[0m
+
+[1m[31mERROR[39m[22m in [1m./src/app/cart/infrastructure/clients/product-service.client.ts:[32m[1m150:30[22m[39m[1m[39m[22m
+[90mTS2551: [39mProperty 'categoryId' does not exist on type 'CheckSkuAvailabilityResponse'. Did you mean 'category'?
+  [0m [90m 148 |[39m       description[33m:[39m availability[33m.[39mdescription [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 149 |[39m       brand[33m:[39m availability[33m.[39mbrandId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+  [31m[1m>[22m[39m[90m 150 |[39m       category[33m:[39m availability[33m.[39mcategoryId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m     |[39m                              [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 151 |[39m       attributes[33m,[39m
+   [90m 152 |[39m       variants[33m:[39m { [33m...[39mattributes }[33m,[39m
+   [90m 153 |[39m     }[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (f760dad68b6a0653)
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 417 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/cart/infrastructure/clients/product-service.client.ts:[32m[1m149:27[22m[39m[1m[39m[22m
+[90mTS2551: [39mProperty 'brandId' does not exist on type 'CheckSkuAvailabilityResponse'. Did you mean 'brand'?
+  [0m [90m 147 |[39m       name[33m:[39m availability[33m.[39mproductName [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 148 |[39m       description[33m:[39m availability[33m.[39mdescription [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+  [31m[1m>[22m[39m[90m 149 |[39m       brand[33m:[39m availability[33m.[39mbrandId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m     |[39m                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 150 |[39m       category[33m:[39m availability[33m.[39mcategoryId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 151 |[39m       attributes[33m,[39m
+   [90m 152 |[39m       variants[33m:[39m { [33m...[39mattributes }[33m,[39m[0m
+
+[1m[31mERROR[39m[22m in [1m./src/app/cart/infrastructure/clients/product-service.client.ts:[32m[1m150:30[22m[39m[1m[39m[22m
+[90mTS2551: [39mProperty 'categoryId' does not exist on type 'CheckSkuAvailabilityResponse'. Did you mean 'category'?
+  [0m [90m 148 |[39m       description[33m:[39m availability[33m.[39mdescription [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m 149 |[39m       brand[33m:[39m availability[33m.[39mbrandId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+  [31m[1m>[22m[39m[90m 150 |[39m       category[33m:[39m availability[33m.[39mcategoryId [33m?[39m[33m?[39m [32m''[39m[33m,[39m
+   [90m     |[39m                              [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 151 |[39m       attributes[33m,[39m
+   [90m 152 |[39m       variants[33m:[39m { [33m...[39mattributes }[33m,[39m
+   [90m 153 |[39m     }[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (f760dad68b6a0653)
+Warning: command "webpack-cli build --node-env=production" exited with non-zero status code

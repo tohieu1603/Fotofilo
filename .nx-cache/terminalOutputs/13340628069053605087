@@ -1,0 +1,37 @@
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 489 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts[39m[22m [1m[32m10:16-42[39m[22m
+[1mModule [1m[31mnot found[39m[22m[1m: [1m[31mError[39m[22m[1m: Can't resolve '@fotofilo/proto' in 'C:\Users\ADMIN\Fotofilo\apps\order-service\src\app\orders\infrastructure\clients'[39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m9:8[22m[39m[1m[39m[22m
+[90mTS2307: [39mCannot find module '@fotofilo/proto' or its corresponding type declarations.
+  [0m [90m  7 |[39m   [33mGetPaymentByOrderIdRequest[39m[33m,[39m
+   [90m  8 |[39m   [33mPaymentMethod[39m[33m,[39m
+  [31m[1m>[22m[39m[90m  9 |[39m } [36mfrom[39m [32m'@fotofilo/proto'[39m[33m;[39m
+   [90m    |[39m        [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 10 |[39m
+   [90m 11 |[39m [36minterface[39m [33mPaymentServiceGrpc[39m {
+   [90m 12 |[39m   createPayment(request[33m:[39m [33mCreatePaymentRequest[39m)[33m:[39m [33mObservable[39m[33m<[39m[33mPaymentResponse[39m[33m>[39m[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (a12d252e0291cff1)
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 489 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts[39m[22m [1m[32m10:16-42[39m[22m
+[1mModule [1m[31mnot found[39m[22m[1m: [1m[31mError[39m[22m[1m: Can't resolve '@fotofilo/proto' in 'C:\Users\ADMIN\Fotofilo\apps\order-service\src\app\orders\infrastructure\clients'[39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m9:8[22m[39m[1m[39m[22m
+[90mTS2307: [39mCannot find module '@fotofilo/proto' or its corresponding type declarations.
+  [0m [90m  7 |[39m   [33mGetPaymentByOrderIdRequest[39m[33m,[39m
+   [90m  8 |[39m   [33mPaymentMethod[39m[33m,[39m
+  [31m[1m>[22m[39m[90m  9 |[39m } [36mfrom[39m [32m'@fotofilo/proto'[39m[33m;[39m
+   [90m    |[39m        [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 10 |[39m
+   [90m 11 |[39m [36minterface[39m [33mPaymentServiceGrpc[39m {
+   [90m 12 |[39m   createPayment(request[33m:[39m [33mCreatePaymentRequest[39m)[33m:[39m [33mObservable[39m[33m<[39m[33mPaymentResponse[39m[33m>[39m[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (a12d252e0291cff1)
+Warning: command "webpack-cli build --node-env=production" exited with non-zero status code

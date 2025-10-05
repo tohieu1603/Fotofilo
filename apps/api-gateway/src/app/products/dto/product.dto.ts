@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SkuDto } from './sku.dto';
+import { BrandDto } from './brand.dto';
+import { CategoryDto } from './category.dto';
 
 export class ProductDto {
   @ApiProperty()
@@ -17,11 +19,14 @@ export class ProductDto {
   @ApiProperty({ type: Number })
   price: number;
 
-  @ApiProperty({ required: false })
-  brandId?: string;
+  @ApiProperty({ type: Number, required: false })
+  originalPrice?: number;
 
-  @ApiProperty({ required: false })
-  categoryId?: string;
+  @ApiProperty({ type: BrandDto, required: false })
+  brand?: BrandDto;
+
+  @ApiProperty({ type: CategoryDto, required: false })
+  category?: CategoryDto;
 
   @ApiProperty({ type: [SkuDto], required: false })
   skus?: SkuDto[];

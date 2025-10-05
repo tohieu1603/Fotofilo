@@ -1,0 +1,26 @@
+[2m> [22mwebpack-cli build --node-env=production
+
+
+[0m[7m[1m[31m NX [39m[22m[27m[0m  [31mAn error occured while creating pruned lockfile[39m
+
+Please open an issue at `https://github.com/nrwl/nx/issues/new?template=1-bug.yml` and provide a reproduction.
+To prevent the build from breaking we are returning the root lock file.
+If you run `npm install --package-lock-only` in your output folder it will regenerate the correct pruned lockfile.
+
+Original error: Pruned lock file creation failed. The following package was not found in the root lock file: @grpc/proto-loader@^0.7.0
+
+
+Error: Pruned lock file creation failed. The following package was not found in the root lock file: @grpc/proto-loader@^0.7.0
+    at C:\Users\ADMIN\Fotofilo\node_modules\nx\src\plugins\js\lock-file\project-graph-pruning.js:57:19
+    at Array.forEach (<anonymous>)
+    at normalizeDependencies (C:\Users\ADMIN\Fotofilo\node_modules\nx\src\plugins\js\lock-file\project-graph-pruning.js:39:42)
+    at pruneProjectGraph (C:\Users\ADMIN\Fotofilo\node_modules\nx\src\plugins\js\lock-file\project-graph-pruning.js:18:34)
+    at createLockFile (C:\Users\ADMIN\Fotofilo\node_modules\nx\src\plugins\js\lock-file\lock-file.js:210:79)
+    at C:\Users\ADMIN\Fotofilo\node_modules\@nx\webpack\src\plugins\generate-package-json-plugin.js:46:142
+    at fn (C:\Users\ADMIN\Fotofilo\node_modules\webpack\lib\Compilation.js:567:10)
+    at Hook.eval [as callAsync] (eval at create (C:\Users\ADMIN\Fotofilo\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:10:1)
+    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (C:\Users\ADMIN\Fotofilo\node_modules\tapable\lib\Hook.js:21:14)
+    at cont (C:\Users\ADMIN\Fotofilo\node_modules\webpack\lib\Compilation.js:3396:34)
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 350 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+webpack compiled [1m[32msuccessfully[39m[22m (66d0088e33ed8817)

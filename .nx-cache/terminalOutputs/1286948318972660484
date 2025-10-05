@@ -1,0 +1,51 @@
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 489 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m87:7[22m[39m[1m[39m[22m
+[90mTS2740: [39mType '{}' is missing the following properties from type 'PaymentResponse': id, orderId, customerId, amount, and 10 more.
+  [0m [90m 85 |[39m         [36mthis[39m[33m.[39mpaymentService[33m.[39mcreatePayment(request)[33m,[39m
+   [90m 86 |[39m       )[33m;[39m
+  [31m[1m>[22m[39m[90m 87 |[39m       [36mreturn[39m response[33m;[39m
+   [90m    |[39m       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 88 |[39m     } [36mcatch[39m (error) {
+   [90m 89 |[39m       [36mthis[39m[33m.[39mlogger[33m.[39merror([32m`Failed to create payment: ${error.message}`[39m)[33m;[39m
+   [90m 90 |[39m       [36mthrow[39m error[33m;[39m[0m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m99:7[22m[39m[1m[39m[22m
+[90mTS2740: [39mType '{}' is missing the following properties from type 'PaymentResponse': id, orderId, customerId, amount, and 10 more.
+  [0m [90m  97 |[39m         [36mthis[39m[33m.[39mpaymentService[33m.[39mgetPaymentByOrderId({ orderId })[33m,[39m
+   [90m  98 |[39m       )[33m;[39m
+  [31m[1m>[22m[39m[90m  99 |[39m       [36mreturn[39m response[33m;[39m
+   [90m     |[39m       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 100 |[39m     } [36mcatch[39m (error) {
+   [90m 101 |[39m       [36mthis[39m[33m.[39mlogger[33m.[39merror([32m`Failed to get payment for order ${orderId}: ${error.message}`[39m)[33m;[39m
+   [90m 102 |[39m       [36mthrow[39m error[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (63d82aaf5d2e42c2)
+[2m> [22mwebpack-cli build --node-env=production
+
+chunk (runtime: main) [1m[32mmain.js[39m[22m (main) 489 KiB [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m87:7[22m[39m[1m[39m[22m
+[90mTS2740: [39mType '{}' is missing the following properties from type 'PaymentResponse': id, orderId, customerId, amount, and 10 more.
+  [0m [90m 85 |[39m         [36mthis[39m[33m.[39mpaymentService[33m.[39mcreatePayment(request)[33m,[39m
+   [90m 86 |[39m       )[33m;[39m
+  [31m[1m>[22m[39m[90m 87 |[39m       [36mreturn[39m response[33m;[39m
+   [90m    |[39m       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 88 |[39m     } [36mcatch[39m (error) {
+   [90m 89 |[39m       [36mthis[39m[33m.[39mlogger[33m.[39merror([32m`Failed to create payment: ${error.message}`[39m)[33m;[39m
+   [90m 90 |[39m       [36mthrow[39m error[33m;[39m[0m
+
+[1m[31mERROR[39m[22m in [1m./src/app/orders/infrastructure/clients/payment-service.client.ts:[32m[1m99:7[22m[39m[1m[39m[22m
+[90mTS2740: [39mType '{}' is missing the following properties from type 'PaymentResponse': id, orderId, customerId, amount, and 10 more.
+  [0m [90m  97 |[39m         [36mthis[39m[33m.[39mpaymentService[33m.[39mgetPaymentByOrderId({ orderId })[33m,[39m
+   [90m  98 |[39m       )[33m;[39m
+  [31m[1m>[22m[39m[90m  99 |[39m       [36mreturn[39m response[33m;[39m
+   [90m     |[39m       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+   [90m 100 |[39m     } [36mcatch[39m (error) {
+   [90m 101 |[39m       [36mthis[39m[33m.[39mlogger[33m.[39merror([32m`Failed to get payment for order ${orderId}: ${error.message}`[39m)[33m;[39m
+   [90m 102 |[39m       [36mthrow[39m error[33m;[39m[0m
+
+webpack compiled with [1m[31m2 errors[39m[22m (63d82aaf5d2e42c2)
+Warning: command "webpack-cli build --node-env=production" exited with non-zero status code

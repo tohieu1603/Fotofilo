@@ -139,6 +139,11 @@ export class CreateOrderDto {
   @IsOptional()
   discountAmount?: MoneyDto;
 
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  paymentMethod: string;
+
   @ApiProperty({ example: 'USD', description: 'Currency code' })
   @IsString()
   @IsNotEmpty()

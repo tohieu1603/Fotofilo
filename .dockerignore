@@ -1,0 +1,75 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json.bak
+
+# Build outputs
+dist
+build
+.next
+out
+
+# NX cache
+.nx
+.nx-cache
+
+# Testing
+coverage
+*.spec.ts
+*.test.ts
+**/*.spec.ts
+**/*.test.ts
+jest.config.ts
+jest.config.js
+
+# E2E tests
+*-e2e
+apps/*-e2e
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs
+README.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+azure-pipelines.yml
+
+# Logs
+logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore

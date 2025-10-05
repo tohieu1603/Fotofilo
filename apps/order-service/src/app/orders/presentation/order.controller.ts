@@ -28,10 +28,9 @@ export class OrderController implements Order.OrderServiceController {
     private readonly queryBus: QueryBus,
     private readonly addressService: AddressServiceClient,
     private readonly orderResponseMapper: OrderResponseMapper,
-  ) {}
+  ) { }
 
   async createOrder(request: Order.CreateOrderRequest, metadata?: Metadata): Promise<Order.OrderResponse> {
-    // Extract customerId from gRPC metadata (passed from API Gateway)
     const userIdMeta = metadata?.get('userId')?.[0];
     const customerId = userIdMeta ? String(userIdMeta) : null;
 
@@ -43,23 +42,20 @@ export class OrderController implements Order.OrderServiceController {
     this.logger.log(`Shipping Address ID: ${request.shippingAddressId}`);
     this.logger.log(`Billing Address ID: ${request.billingAddressId}`);
 
-    // Convert items to command format
     const items = request.items.map(item => ({
       productId: item.productId,
-      productSku: item.skuCode || item.skuId, // Use skuCode first, fallback to skuId
-      skuId: item.skuId, // Keep skuId for validation
+      productSku: item.skuCode || item.skuId,
+      skuId: item.skuId,
       quantity: item.quantity,
       requestedPrice: item.unitPrice?.amount,
     }));
 
-    // Convert shipping method enum to string
     const shippingMethodMap = {
       [Order.ShippingMethod.SHIPPING_METHOD_STANDARD]: 'STANDARD' as const,
       [Order.ShippingMethod.SHIPPING_METHOD_EXPRESS]: 'EXPRESS' as const,
       [Order.ShippingMethod.SHIPPING_METHOD_OVERNIGHT]: 'OVERNIGHT' as const,
     };
 
-    // Fetch address details from AddressService
     let shippingAddress = undefined;
     let billingAddress = undefined;
 
@@ -68,14 +64,14 @@ export class OrderController implements Order.OrderServiceController {
         const shippingAddressResponse = await this.addressService.getAddress(request.shippingAddressId);
         if (shippingAddressResponse.address) {
           shippingAddress = {
-            fullName: `${customerId}-shipping`, // We'll need to get this from user service or pass it
+            fullName: `${customerId}-shipping`,
             addressLine1: `${shippingAddressResponse.address.ward}, ${shippingAddressResponse.address.district}`,
             addressLine2: '',
             city: shippingAddressResponse.address.city,
             state: '',
             postalCode: '',
             country: 'Vietnam',
-            phoneNumber: '', // We'll need to get this from user service
+            phoneNumber: '',
           };
         }
       }
@@ -95,7 +91,6 @@ export class OrderController implements Order.OrderServiceController {
           };
         }
       } else if (request.billingAddressId === request.shippingAddressId) {
-        // Use shipping address as billing address
         billingAddress = shippingAddress;
       }
     } catch (error) {
@@ -103,8 +98,10 @@ export class OrderController implements Order.OrderServiceController {
       throw new Error(`Failed to fetch address details: ${error.message}`);
     }
 
+    const paymentMethod = (request.paymentMethod?.toUpperCase() as 'COD' | 'MOMO' | 'VNPAY' | 'STRIPE') || 'COD';
+
     const command = new CreateOrderCommand(
-      customerId, // Use extracted customerId from JWT
+      customerId,
       items,
       shippingAddress,
       billingAddress,
@@ -113,22 +110,31 @@ export class OrderController implements Order.OrderServiceController {
       request.currency,
       request.shippingAddressId,
       request.billingAddressId,
+      paymentMethod,
     );
 
     const createResult = await this.commandBus.execute(command);
 
-    // Check if creation was successful
     if (!createResult.success) {
       throw new Error(`Failed to create order: ${createResult.errors?.join(', ')}`);
     }
 
     this.logger.log(`Order created successfully: ${createResult.orderId}`);
+    if (createResult.paymentUrl) {
+      this.logger.log(`Payment URL: ${createResult.paymentUrl}`);
+    }
 
-    // Get the created order to return proper OrderResponse
     const getOrderQuery = new GetOrderByIdQuery(createResult.orderId);
     const orderDto = await this.queryBus.execute(getOrderQuery);
 
-    return this.orderResponseMapper.toOrderResponse(orderDto);
+    const response = this.orderResponseMapper.toOrderResponse(orderDto);
+
+    // Add payment URL to response metadata
+    if (createResult.paymentUrl) {
+      (response as any).paymentUrl = createResult.paymentUrl;
+    }
+
+    return response;
   }
 
   async getOrderById(request: Order.GetOrderByIdRequest): Promise<Order.OrderResponse> {
@@ -152,7 +158,6 @@ export class OrderController implements Order.OrderServiceController {
   }
 
   async listOrdersByCustomer(request: Order.ListOrdersByCustomerRequest, metadata?: Metadata): Promise<Order.OrderListResponse> {
-    // Extract customerId from gRPC metadata (passed from API Gateway)
     const userIdMeta = metadata?.get('userId')?.[0];
     const customerId = userIdMeta ? String(userIdMeta) : null;
 
@@ -162,7 +167,6 @@ export class OrderController implements Order.OrderServiceController {
 
     this.logger.log(`Getting orders for customer: ${customerId}`);
 
-    // Convert OrderStatus enum to string
     const statusMap = {
       [Order.OrderStatus.ORDER_STATUS_PENDING]: 'PENDING' as const,
       [Order.OrderStatus.ORDER_STATUS_PROCESSING]: 'PROCESSING' as const,
@@ -172,7 +176,7 @@ export class OrderController implements Order.OrderServiceController {
     };
 
     const query = new ListOrdersByCustomerQuery(
-      customerId, // Use extracted customerId from JWT
+      customerId,
       request.pageSize,
       request.pageToken,
       request.statusFilter !== Order.OrderStatus.ORDER_STATUS_UNSPECIFIED
@@ -184,7 +188,6 @@ export class OrderController implements Order.OrderServiceController {
 
     this.logger.log(`Found ${result.orders?.length || 0} orders for customer`);
 
-    // Map the DTO response to the proper gRPC format
     return {
       orders: result.orders?.map(order => this.orderResponseMapper.toOrderResponse(order)) || [],
       nextPageToken: result.nextPageToken || "",
@@ -195,7 +198,6 @@ export class OrderController implements Order.OrderServiceController {
   async updateOrderStatus(request: Order.UpdateOrderStatusRequest): Promise<Order.OrderResponse> {
     this.logger.log(`Updating order status: ${request.orderId} -> ${request.status}`);
 
-    // Convert OrderStatus enum to string
     const statusMap = {
       [Order.OrderStatus.ORDER_STATUS_PENDING]: 'PENDING' as const,
       [Order.OrderStatus.ORDER_STATUS_PROCESSING]: 'PROCESSING' as const,

@@ -15,13 +15,14 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { GrpcClientExceptionFilter } from '../common/filters/grpc-exception.filter';
-import { Product } from '@nestcm/proto';
+import { Metadata, Product } from '@nestcm/proto';
 
 import {
   CreateProductDto,
@@ -33,9 +34,9 @@ import {
 } from './dto';
 
 import { ProductMapperService } from './mappers';
-import { CreateProductResponse } from 'libs/proto/src/generated/product';
 import { OptionalJwtAuthGuard } from '../auth/guards';
 import { OptionalUser } from '../auth/decorators';
+import { GetAttributeOptionsResponseDto } from './dto/attribute.dto';
 
 @ApiTags('Products')
 @ApiBearerAuth('access-token')
@@ -69,21 +70,28 @@ export class ProductController {
 
   @Get()
   @ApiOperation({ summary: 'Get products (pagination + filters)' })
-  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
-  @ApiQuery({ name: 'keyword', required: false, type: String, example: 'shirt' })
-  @ApiQuery({ name: 'brandId', required: false, type: String })
-  @ApiQuery({ name: 'categoryId', required: false, type: String })
-  @ApiQuery({ name: 'sort', required: false, type: String, example: 'price:asc' })
   @ApiResponse({ status: 200, description: 'Products list', type: GetProductsResponseDto })
   async getProducts(@Query() query: GetProductsQueryDto): Promise<GetProductsResponseDto> {
+    // Map DTO enums to Proto enums
+    let sortField = Product.SortField.SORT_FIELD_UNSPECIFIED;
+    if (query.sortField === 'name') sortField = Product.SortField.SORT_FIELD_NAME;
+    else if (query.sortField === 'price') sortField = Product.SortField.SORT_FIELD_PRICE;
+    else if (query.sortField === 'createdAt') sortField = Product.SortField.SORT_FIELD_CREATED_AT;
+
+    let sortOrder = Product.SortOrder.SORT_ORDER_UNSPECIFIED;
+    if (query.sortOrder === 'asc') sortOrder = Product.SortOrder.SORT_ORDER_ASC;
+    else if (query.sortOrder === 'desc') sortOrder = Product.SortOrder.SORT_ORDER_DESC;
+
     const req: Product.GetAllProductsRequest = {
       page: query.page ?? 1,
       limit: query.limit ?? 20,
       keyword: query.keyword || '',
       brandId: query.brandId || '',
       categoryId: query.categoryId || '',
-      sort: query.sort || 'name:asc',
+      sortField,
+      sortOrder,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
     };
 
     const response = await this.productService.getProducts(req);
@@ -95,6 +103,25 @@ export class ProductController {
       page: response.page || req.page,
       limit: response.limit || req.limit,
     };
+  }
+
+  @Get('attributes')
+  @ApiProperty()
+  @ApiOperation({ summary: 'Get all attributes' })
+  @ApiResponse({ status: 404, description: 'Attributes not found' })
+  getAttributes(): Promise<Product.GetAttributesResponse> {
+    return this.productService.getAttribute();
+  }
+
+  @Get('attributes/:attributeId/options')
+  @ApiOperation({ summary: 'Get attribute options by attribute ID' })
+  @ApiParam({ name: 'attributeId', required: true, description: 'Attribute ID' })
+  @ApiResponse({ status: 200, description: 'Attribute options list', type: GetAttributeOptionsResponseDto })
+  @ApiResponse({ status: 404, description: 'Attribute not found' })
+  async getAttributeOptions(
+    @Param('attributeId') attributeId: string,
+  ): Promise<Product.GetAttributeOptionsResponse> {
+    return this.productService.getAttributeOptions(attributeId);
   }
 
   @Get(':id')

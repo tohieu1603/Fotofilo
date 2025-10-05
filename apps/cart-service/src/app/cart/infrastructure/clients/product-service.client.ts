@@ -146,8 +146,8 @@ export class ProductServiceClient implements OnModuleInit, IProductServiceClient
     return {
       name: availability.productName ?? '',
       description: availability.description ?? '',
-      brand: availability.brandId ?? '',
-      category: availability.categoryId ?? '',
+      brand: availability.brand?.name ?? '',
+      category: availability.category?.name ?? '',
       attributes,
       variants: { ...attributes },
     };

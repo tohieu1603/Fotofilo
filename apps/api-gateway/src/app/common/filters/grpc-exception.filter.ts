@@ -26,7 +26,8 @@ export class GrpcClientExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
 
     // Log the original exception for debugging
-    this.logger.error(`gRPC Exception: ${exception.message}`, {
+    this.logger.error(`gRPC Exception: ${exception.message}`, exception.stack);
+    this.logger.debug({
       code: exception?.code,
       details: exception?.details,
       metadata: exception?.metadata,

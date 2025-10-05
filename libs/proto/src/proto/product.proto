@@ -10,36 +10,85 @@ service ProductService {
   rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
   rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
   rpc existingSku (CheckSkuAvailabilityRequest) returns (CheckSkuAvailabilityResponse);
+  rpc GetAttributes (GetAttributesRequest) returns (GetAttributesResponse);
+  rpc GetAttributeOptions (GetAttributeOptionsRequest) returns (GetAttributeOptionsResponse);
 }
 
-message CheckSkuAvailabilityRequest {
-  string skuId = 1;      
-  int32 quantity = 2;     
+message GetAttributesRequest {}
+
+message GetAttributesResponse {
+  repeated AttributeDetail attributes = 1;
 }
 
-message CheckSkuAvailabilityResponse {
-  bool exists = 1;
-  bool inStock = 2;
-  int32 availableStock = 3;
-  string message = 4;
-  string productId = 5;
-  string skuCode = 6;
-  double price = 7;
-  string productName = 8;
-  string description = 9;
-  string image = 10;
-  string brandId = 11;
-  string categoryId = 12;
-  repeated SkuOptionResponse skuOptions = 13;
+message GetAttributeOptionsRequest {
+  string attributeId = 1;
 }
 
-// ======================= Create Product =======================
+message GetAttributeOptionsResponse {
+  string attributeId = 1;
+  string attributeName = 2;
+  repeated AttributeOption options = 3;
+}
+
+message AttributeOption {
+  string id = 1;
+  string value = 2;
+  string description = 3;
+}
+
+message AttributeDetail {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+enum SortField {
+  SORT_FIELD_UNSPECIFIED = 0;
+  SORT_FIELD_NAME = 1;
+  SORT_FIELD_PRICE = 2;
+  SORT_FIELD_CREATED_AT = 3;
+}
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
+}
+
+message BrandResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message CategoryResponse {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+}
+
+message SkuResponse {
+  string id = 1;
+  string skuCode = 2;
+  double price = 3;
+  int32 stock = 4;
+  string image = 5;
+  repeated SkuOptionResponse skuOptions = 6;
+  double originalPrice = 7;
+}
+
+message SkuOptionResponse {
+  string attributeOptionId = 1;
+  string attributeOptionValue = 2;
+  AttributeDetail attribute = 3;
+}
+
 message CreateProductRequest {
   string name = 1;
   string description = 2;
   string brandId = 3;
   string categoryId = 4;
   repeated CreateSkuInput skus = 5;
+  double originalPrice = 6;
 }
 
 message CreateSkuInput {
@@ -58,7 +107,6 @@ message CreateProductResponse {
   GetProductResponse product = 1;
 }
 
-// ======================= Get Product =======================
 message GetProductRequest {
   string id = 1;
   optional string userId = 2;
@@ -68,47 +116,39 @@ message GetProductResponse {
   string id = 1;
   string name = 2;
   string description = 3;
-  string brandId = 4;
-  string categoryId = 5;
+  BrandResponse brand = 4;
+  CategoryResponse category = 5;
   repeated SkuResponse skus = 6;
+  double originalPrice = 7;
 }
 
 message GetProductSkuRequest {
   string id = 1;
 }
 
-message ListSkuRequest {
-  repeated string skuIds = 1;
-}
-
-message ListSkuResponse {
-  repeated SkuResponse skus = 1;
-}
-
 message GetProductSkuResponse {
   string id = 1;
   string name = 2;
   string description = 3;
-  string brandId = 4;
-  string categoryId = 5;
+  BrandResponse brand = 4;
+  CategoryResponse category = 5;
   repeated SkuResponse skus = 6;
 }
 
-// ======================= Update Product =======================
 message UpdateProductRequest {
   string id = 1;
   string name = 2;
   string description = 3;
   string brandId = 4;
   string categoryId = 5;
-  repeated CreateSkuInput skus = 6; // reuse input from Create
+  repeated CreateSkuInput skus = 6;
+  double originalPrice = 7;
 }
 
 message UpdateProductResponse {
   GetProductResponse product = 1;
 }
 
-// ======================= Delete Product =======================
 message DeleteProductRequest {
   string id = 1;
 }
@@ -117,14 +157,16 @@ message DeleteProductResponse {
   bool message = 1;
 }
 
-// ======================= Get All Products =======================
 message GetAllProductsRequest {
   int32 page = 1;
   int32 limit = 2;
   string keyword = 3;
   string brandId = 4;
   string categoryId = 5;
-  string sort = 6; 
+  SortField sortField = 6;
+  SortOrder sortOrder = 7;
+  optional double minPrice = 8;
+  optional double maxPrice = 9;
 }
 
 message GetAllProductsResponse {
@@ -133,27 +175,6 @@ message GetAllProductsResponse {
   int32 page = 3;        
   int32 limit = 4;       
   int32 totalPages = 5;  
-}
-
-message SkuResponse {
-  string id = 1;
-  string skuCode = 2;
-  double price = 3;
-  int32 stock = 4;
-  string image = 5;
-  repeated SkuOptionResponse skuOptions = 6;
-}
-
-message SkuOptionResponse {
-  string attributeOptionId = 1;
-  string attributeOptionValue = 2;
-  AttributeDetail attribute = 3;
-}
-
-message AttributeDetail {
-  string id = 1;
-  string name = 2;
-  string description = 3;
 }
 
 message SkuValidationInput {
@@ -168,12 +189,11 @@ message ValidateSkuInputRequest {
 }
 
 message SkuValidationResult {
-  // Thông tin sản phẩm
   string productId = 1;
   string name = 2;
   string description = 3;
-  string brandId = 4;
-  string categoryId = 5;
+  BrandResponse brand = 4;
+  CategoryResponse category = 5;
 
   string skuId = 6;
   string skuCode = 7;
@@ -181,8 +201,6 @@ message SkuValidationResult {
   int32 stock = 9;
   string image = 10;
   repeated SkuOptionResponse skuOptions = 11;
-
-  // Trạng thái kiểm tra
   bool valid = 12;
   bool inStock = 13;
   int32 availableStock = 14;
@@ -192,4 +210,26 @@ message SkuValidationResult {
 message ValidateSkuInputResponse {
   bool allValid = 1;
   repeated SkuValidationResult results = 2;
+}
+
+// ======================= SKU Availability =======================
+message CheckSkuAvailabilityRequest {
+  string skuId = 1;      
+  int32 quantity = 2;     
+}
+
+message CheckSkuAvailabilityResponse {
+  bool exists = 1;
+  bool inStock = 2;
+  int32 availableStock = 3;
+  string message = 4;
+  string productId = 5;
+  string skuCode = 6;
+  double price = 7;
+  string productName = 8;
+  string description = 9;
+  string image = 10;
+  BrandResponse brand = 11;
+  CategoryResponse category = 12;
+  repeated SkuOptionResponse skuOptions = 13;
 }

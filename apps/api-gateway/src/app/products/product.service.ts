@@ -49,4 +49,18 @@ export class ProductService implements OnModuleInit {
       )
     );
   }
+  async getAttribute(): Promise<Product.GetAttributesResponse> {
+    return lastValueFrom(
+      from(this.productService.getAttributes({}, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
+  }
+  async getAttributeOptions(attributeId: string): Promise<Product.GetAttributeOptionsResponse> {
+    return lastValueFrom(
+      from(this.productService.getAttributeOptions({ attributeId }, new Metadata)).pipe(
+        timeout(5000)
+      )
+    );
+  }
 }

@@ -61,4 +61,8 @@ export class TypeOrmOrderRepository {
     const count = await this.orderRepository.count({ where: { id } });
     return count > 0;
   }
+
+  async updatePaymentUrl(orderId: string, paymentUrl: string): Promise<void> {
+    await this.orderRepository.update(orderId, { paymentUrl });
+  }
 }

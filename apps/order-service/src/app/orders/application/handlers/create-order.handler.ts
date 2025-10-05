@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { CreateOrderCommand } from '../commands/create-order.command';
 import { ProductServiceClient, ProductValidationRequest, ProductValidationResult } from '../../infrastructure/clients/product-service.client';
 import { InventoryServiceClient } from '../../infrastructure/clients/inventory-service.client';
+import { PaymentServiceClient } from '../../infrastructure/clients/payment-service.client';
 import { TypeOrmOrderRepository } from '../../infrastructure/repositories/typeorm-order.repository';
 import { CreateOrderData, OrderDto, OrderStatusValue, ShippingMethodValue } from '../dto/order.dto';
 import { KafkaService } from '../../../common/kafka/kafka.service';
@@ -11,6 +12,7 @@ export interface CreateOrderResult {
   success: boolean;
   orderId?: string;
   orderNumber?: string;
+  paymentUrl?: string;
   errors?: string[];
 }
 
@@ -21,6 +23,7 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
   constructor(
     private readonly productServiceClient: ProductServiceClient,
     private readonly inventoryServiceClient: InventoryServiceClient,
+    private readonly paymentServiceClient: PaymentServiceClient,
     private readonly orderRepository: TypeOrmOrderRepository,
     private readonly kafkaService: KafkaService,
   ) {}
@@ -103,6 +106,36 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
 
       this.logger.log(`Order created successfully: ${savedOrder.id}`);
 
+      // Create payment synchronously
+      let paymentUrl: string | undefined = undefined;
+      try {
+        const paymentMethod = command.paymentMethod || 'COD';
+        this.logger.log(`Creating payment with method: ${paymentMethod}`);
+
+        const paymentResponse = await this.paymentServiceClient.createPayment(
+          savedOrder.id,
+          savedOrder.customerId,
+          savedOrder.totalAmount,
+          savedOrder.currency,
+          paymentMethod,
+          `Payment for order ${savedOrder.orderNumber}`,
+        );
+
+        paymentUrl = paymentResponse.paymentUrl;
+
+        // Update order with payment URL if exists
+        if (paymentUrl) {
+          await this.orderRepository.updatePaymentUrl(savedOrder.id, paymentUrl);
+          this.logger.log(`Payment URL saved for order ${savedOrder.id}: ${paymentUrl}`);
+        }
+
+        this.logger.log(`Payment created successfully for order ${savedOrder.id}`);
+      } catch (paymentError) {
+        this.logger.error('Failed to create payment:', paymentError);
+        // Don't fail the order creation if payment creation fails
+        // The order can be processed later
+      }
+
       try {
         const orderCreatedEvent = {
           orderId: savedOrder.id,
@@ -112,6 +145,7 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
           totalAmount: savedOrder.totalAmount,
           currency: savedOrder.currency,
           status: savedOrder.status,
+          paymentMethod: command.paymentMethod || 'COD',
           customerEmail: null,
           items: savedOrder.items.map(item => ({
             productName: item.productName,
@@ -133,6 +167,7 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
         success: true,
         orderId: savedOrder.id,
         orderNumber: savedOrder.orderNumber,
+        paymentUrl,
       };
     } catch (error) {
       this.logger.error('Error creating order:', error);

@@ -23,8 +23,15 @@ export class SkuMapper {
       productName: product.name,
       description: product.description ?? '',
       image: sku.image ?? '',
-      brandId: product.brandId ?? '',
-      categoryId: product.categoryId ?? '',
+      brand: product.brand ? {
+        id: product.brand.id,
+        name: product.brand.name,
+      } : undefined,
+      category: product.category ? {
+        id: product.category.id,
+        name: product.category.name,
+        slug: product.category.slug,
+      } : undefined,
       skuOptions:
         sku.skuOptions?.map((option) => ({
           attributeOptionId: option.attributeOption?.id ?? '',

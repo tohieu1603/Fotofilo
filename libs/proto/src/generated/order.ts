@@ -59,6 +59,7 @@ export interface CreateOrderRequest {
   notes: string;
   discountAmount?: Money | undefined;
   currency: string;
+  paymentMethod: string;
 }
 
 export interface GetOrderByIdRequest {
@@ -313,7 +314,15 @@ export const OrderItem = {
 };
 
 function createBaseCreateOrderRequest(): CreateOrderRequest {
-  return { items: [], shippingAddressId: "", billingAddressId: "", shippingMethod: 0, notes: "", currency: "" };
+  return {
+    items: [],
+    shippingAddressId: "",
+    billingAddressId: "",
+    shippingMethod: 0,
+    notes: "",
+    currency: "",
+    paymentMethod: "",
+  };
 }
 
 export const CreateOrderRequest = {
@@ -338,6 +347,9 @@ export const CreateOrderRequest = {
     }
     if (message.currency !== "") {
       writer.uint32(58).string(message.currency);
+    }
+    if (message.paymentMethod !== "") {
+      writer.uint32(66).string(message.paymentMethod);
     }
     return writer;
   },
@@ -397,6 +409,13 @@ export const CreateOrderRequest = {
           }
 
           message.currency = reader.string();
+          continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.paymentMethod = reader.string();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {

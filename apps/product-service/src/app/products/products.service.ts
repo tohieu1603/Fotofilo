@@ -16,6 +16,7 @@ import { ProductMapper } from './mappers/product.mapper';
 import { Product as ProductProto } from '@nestcm/proto';
 import { SkuMapper } from './mappers/sku.mapper';
 import { KafkaService } from '../shared/kafka/kafka.service';
+import { Attribute } from './entities/attribute.entity';
 
 @Injectable()
 export class ProductsService {
@@ -31,6 +32,7 @@ export class ProductsService {
     @InjectRepository(Sku) private skuRepo: Repository<Sku>,
     @InjectRepository(Brand) private brandRepo: Repository<Brand>,
     @InjectRepository(CategoryEntity) private categoryRepo: Repository<CategoryEntity>,
+    @InjectRepository(Attribute) private attributeRepo: Repository<Attribute>,
     @InjectRepository(AttributeOption) private attributeOptionRepo: Repository<AttributeOption>,
     @InjectRepository(SkuAttributeOption) private skuAttrOptionRepo: Repository<SkuAttributeOption>,
     private readonly dataSource: DataSource,
@@ -103,6 +105,7 @@ export class ProductsService {
         description: data.description,
         brandId: data.brandId,
         categoryId: data.categoryId,
+        originalPrice: data.originalPrice,
       });
 
       const savedProduct = await queryRunner.manager.save(product);
@@ -208,10 +211,15 @@ export class ProductsService {
   async getProduct(id: string, userId?: string): Promise<ProductProto.GetProductResponse> {
     const product = await this.productRepo.findOne({
       where: { id },
-      relations: ['skus.skuOptions.attributeOption.attribute'],
+      relations: ['brand', 'category', 'skus.skuOptions.attributeOption.attribute'],
     });
 
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: 'Product not found',
+      });
+    }
 
     // Send Kafka event if userId is provided
     if (userId) {
@@ -238,13 +246,19 @@ export class ProductsService {
 
     try {
       const product = await queryRunner.manager.findOneBy(Product, { id });
-      if (!product) throw new NotFoundException('Product not found');
+      if (!product) {
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          details: 'Product not found',
+        });
+      }
 
       Object.assign(product, {
         name: data.name || product.name,
         description: data.description || product.description,
         brandId: data.brandId || product.brandId,
         categoryId: data.categoryId || product.categoryId,
+        originalPrice: data.originalPrice !== undefined ? data.originalPrice : product.originalPrice,
       });
       const savedProduct = await queryRunner.manager.save(product);
 
@@ -300,7 +314,12 @@ export class ProductsService {
 
   async deleteProduct(id: string): Promise<ProductProto.DeleteProductResponse> {
     const product = await this.productRepo.findOneBy({ id });
-    if (!product) throw new NotFoundException('Product not found');
+    if (!product) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: 'Product not found',
+      });
+    }
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -344,25 +363,76 @@ export class ProductsService {
     keyword?: string,
     brandId?: string,
     categoryId?: string,
+    sortField?: ProductProto.SortField,
+    sortOrder?: ProductProto.SortOrder,
+    minPrice?: number,
+    maxPrice?: number,
   ): Promise<ProductProto.GetAllProductsResponse> {
     const skip = (page - 1) * limit;
-    const where: any = {};
+
+    const queryBuilder = this.productRepo.createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.skus', 'skus')
+      .leftJoinAndSelect('skus.skuOptions', 'skuOptions')
+      .leftJoinAndSelect('skuOptions.attributeOption', 'attributeOption')
+      .leftJoinAndSelect('attributeOption.attribute', 'attribute');
+
+    // Filters
     if (keyword) {
-      where.name = ILike(`%${keyword}%`);
+      queryBuilder.andWhere('product.name ILIKE :keyword', { keyword: `%${keyword}%` });
     }
     if (brandId) {
-      where.brandId = brandId;
+      queryBuilder.andWhere('product.brandId = :brandId', { brandId });
     }
     if (categoryId) {
-      where.categoryId = categoryId;
+      queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
     }
 
-    const [products, total] = await this.productRepo.findAndCount({
-      skip,
-      take: limit,
-      relations: ['skus.skuOptions.attributeOption.attribute'],
-      where,
-    });
+    // Price range filtering (based on SKU prices)
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      queryBuilder.andWhere((qb) => {
+        const subQuery = qb.subQuery()
+          .select('sku."productId"')
+          .from(Sku, 'sku');
+
+        if (minPrice !== undefined) {
+          subQuery.andWhere('sku.price >= :minPrice', { minPrice });
+        }
+        if (maxPrice !== undefined) {
+          subQuery.andWhere('sku.price <= :maxPrice', { maxPrice });
+        }
+
+        return 'product.id IN ' + subQuery.getQuery();
+      });
+    }
+
+    // Sorting
+    const orderDirection = sortOrder === ProductProto.SortOrder.SORT_ORDER_DESC ? 'DESC' : 'ASC';
+
+    switch (sortField) {
+      case ProductProto.SortField.SORT_FIELD_NAME:
+        queryBuilder.orderBy('product.name', orderDirection);
+        break;
+      case ProductProto.SortField.SORT_FIELD_PRICE:
+        // Sort by minimum SKU price using raw SQL
+        queryBuilder.orderBy(
+          `(SELECT MIN(price) FROM skus WHERE skus."productId" = product.id)`,
+          orderDirection
+        );
+        break;
+      case ProductProto.SortField.SORT_FIELD_CREATED_AT:
+        queryBuilder.orderBy('product.createdAt', orderDirection);
+        break;
+      default:
+        queryBuilder.orderBy('product.createdAt', 'DESC');
+        break;
+    }
+
+    queryBuilder.skip(skip).take(limit);
+
+    const [products, total] = await queryBuilder.getManyAndCount();
+
     return {
       products: ProductMapper.toListResponse(products),
       total,
@@ -371,6 +441,8 @@ export class ProductsService {
       totalPages: Math.ceil(total / limit)
     };
   }
+
+
 
   async getSkuDetail(skuId: string) {
     const relations = [
@@ -382,17 +454,14 @@ export class ProductsService {
       'skuOptions.attributeOption.attribute',
     ];
 
-    // Smart SKU lookup: if it looks like UUID, search by id first, otherwise by skuCode
     let sku = null;
     if (this.isValidUUID(skuId)) {
-      // Try to find by UUID first
       sku = await this.skuRepo.findOne({
         where: { id: skuId },
         relations,
       });
     }
 
-    // If not found by UUID or not a valid UUID, try by skuCode
     if (!sku) {
       sku = await this.skuRepo.findOne({
         where: { skuCode: skuId },
@@ -401,13 +470,19 @@ export class ProductsService {
     }
 
     if (!sku) {
-      throw new NotFoundException(`SKU not found: ${skuId}`);
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: `SKU not found: ${skuId}`,
+      });
     }
 
     const product = sku.product ?? (await this.productRepo.findOne({ where: { id: sku.productId } }));
 
     if (!product) {
-      throw new NotFoundException(`Product not found for SKU: ${skuId}`);
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: `Product not found for SKU: ${skuId}`,
+      });
     }
 
     const attributes = (sku.skuOptions ?? [])
@@ -453,17 +528,20 @@ export class ProductsService {
     const requestedQuantity = request.quantity ?? 1;
 
     if (!skuId) {
-      throw new BadRequestException('SKU ID is required');
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        details: 'SKU ID is required',
+      });
     }
 
-    // Smart SKU lookup: if it looks like UUID, search by id first, otherwise by skuCode
     let sku = null;
     if (this.isValidUUID(skuId)) {
-      // Try to find by UUID first
       sku = await this.skuRepo.findOne({
         where: { id: skuId },
         relations: [
           'product',
+          'product.brand',
+          'product.category',
           'skuOptions',
           'skuOptions.attributeOption',
           'skuOptions.attributeOption.attribute',
@@ -471,12 +549,13 @@ export class ProductsService {
       });
     }
 
-    // If not found by UUID or not a valid UUID, try by skuCode
     if (!sku) {
       sku = await this.skuRepo.findOne({
         where: { skuCode: skuId },
         relations: [
           'product',
+          'product.brand',
+          'product.category',
           'skuOptions',
           'skuOptions.attributeOption',
           'skuOptions.attributeOption.attribute',
@@ -485,7 +564,10 @@ export class ProductsService {
     }
 
     if (!sku) {
-      throw new NotFoundException(`SKU not found: ${skuId}`);
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: `SKU not found: ${skuId}`,
+      });
     }
 
     const product =
@@ -493,7 +575,10 @@ export class ProductsService {
       (await this.productRepo.findOne({ where: { id: sku.productId } }));
 
     if (!product) {
-      throw new NotFoundException(`Product not found for SKU: ${skuId}`);
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        details: `Product not found for SKU: ${skuId}`,
+      });
     }
 
     const normalizedQuantity = requestedQuantity > 0 ? requestedQuantity : 1;
@@ -519,7 +604,10 @@ export class ProductsService {
     request: ProductProto.ValidateSkuInputRequest,
   ): Promise<ProductProto.ValidateSkuInputResponse> {
     if (!request.items || request.items.length === 0) {
-      throw new BadRequestException('No SKU items provided');
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        details: 'No SKU items provided',
+      });
     }
 
     const results: ProductProto.SkuValidationResult[] = [];
@@ -544,17 +632,14 @@ export class ProductsService {
         'skuOptions.attributeOption.attribute',
       ];
 
-      // Smart SKU lookup: if it looks like UUID, search by id first, otherwise by skuCode
       let sku = null;
       if (this.isValidUUID(skuIdOrCode)) {
-        // Try to find by UUID first
         sku = await this.skuRepo.findOne({
           where: { id: skuIdOrCode },
           relations,
         });
       }
 
-      // If not found by UUID or not a valid UUID, try by skuCode
       if (!sku) {
         sku = await this.skuRepo.findOne({
           where: { skuCode: skuIdOrCode },
@@ -599,8 +684,15 @@ export class ProductsService {
         productId: product.id,
         name: product.name,
         description: product.description ?? '',
-        brandId: product.brandId,
-        categoryId: product.categoryId,
+        brand: product.brand ? {
+          id: product.brand.id,
+          name: product.brand.name,
+        } : undefined,
+        category: product.category ? {
+          id: product.category.id,
+          name: product.category.name,
+          slug: product.category.slug,
+        } : undefined,
         skuId: sku.id,
         skuCode: sku.skuCode,
         price: Number(sku.price),
@@ -623,9 +715,36 @@ export class ProductsService {
       results,
     };
   }
+  async getAttribute(): Promise<ProductProto.GetAttributesResponse> {
+    console.log('Fetching all attributes...');
+    const attribute = await this.attributeRepo.find()
+    return {
+      attributes: attribute.map(attr => ({
+        id: attr.id,
+        name: attr.name,
+        description: attr.description || '',
+      }))
+    }
+  }
 
+  async getAttributeOptions(attributeId: string): Promise<ProductProto.GetAttributeOptionsResponse> {
+  const attribute = await this.attributeRepo.findOneBy({ id: attributeId });
+  if (!attribute) {
+    throw new RpcException({
+      code: GrpcStatus.NOT_FOUND,
+      details: 'Attribute not found',
+    });
+  }
+
+  const options = await this.attributeOptionRepo.findBy({ attributeId });
+  return {
+    attributeId: attribute.id,
+    attributeName: attribute.name,
+    options: options.map(opt => ({
+      id: opt.id,
+      value: opt.value,
+      description: '',
+    })),
+  };
 }
-
-
-
-
+}

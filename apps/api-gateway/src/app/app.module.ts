@@ -20,6 +20,8 @@ import { AddressController } from './address/address.controller';
 import { AddressService } from './address/address.service';
 import { InventoryModule } from './inventory/inventory.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
+import { PaymentController } from './payment/payment.controller';
+import { PaymentService } from './payment/payment.service';
 
 const Controllers = [
   ProductController,
@@ -28,7 +30,8 @@ const Controllers = [
   BrandController,
   CategoryController,
   OrderController,
-  AddressController
+  AddressController,
+  PaymentController
 ];
 
 const Services = [
@@ -40,7 +43,8 @@ const Services = [
   OrderService,
   ProductMapperService,
   CartMapperService,
-  AddressService
+  AddressService,
+  PaymentService
 ];
 
 @Module({
@@ -111,6 +115,15 @@ const Services = [
           package: 'cart',
           protoPath: resolveProtoPaths(['proto/cart.proto']),
           url: process.env.CART_GRPC_URL || 'localhost:50053',
+        },
+      },
+      {
+        name: 'PAYMENT_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'payment',
+          protoPath: resolveProtoPaths(['proto/payment.proto']),
+          url: process.env.PAYMENT_GRPC_URL || 'localhost:50059',
         },
       }
     ]),

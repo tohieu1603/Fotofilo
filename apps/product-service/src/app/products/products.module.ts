@@ -7,7 +7,7 @@ import { Brand } from './entities/brand.entity';
 import { CategoryEntity } from '../categories';
 import { AttributeOption } from './entities/attribute-option.entity';
 import { SkuAttributeOption } from './entities/sku-attribute-option.entity';
-import { ProductsController } from './products.controller';
+import { ProductsGrpcController } from './products.controller';
 import { Attribute } from './entities/attribute.entity';
 import { CommonModule } from '@nestcm/common';
 import { KafkaService } from '../shared/kafka/kafka.service';
@@ -41,7 +41,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       },
     ]),
   ],
-  controllers: [ProductsController],
+  controllers: [ProductsGrpcController],
   providers: [ProductsService, KafkaService],
   exports: [ProductsService],
 })

@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # Infrastructure - Databases
   auth-db:
     image: postgres:15
     container_name: fotofilo-auth-db
@@ -13,19 +14,11 @@ services:
       POSTGRES_DB: auth_db
     volumes:
       - auth_data:/var/lib/postgresql/data
-
-  user-db:
-    image: postgres:15
-    container_name: fotofilo-user-db
-    restart: always
-    ports:
-      - "5434:5432"
-    environment:
-      POSTGRES_USER: user_user
-      POSTGRES_PASSWORD: user_pass
-      POSTGRES_DB: user_db
-    volumes:
-      - user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   product-db:
     image: postgres:15
@@ -39,6 +32,11 @@ services:
       POSTGRES_DB: product_db
     volumes:
       - product_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U product_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   order-db:
     image: postgres:15
@@ -52,6 +50,11 @@ services:
       POSTGRES_DB: order_db
     volumes:
       - order_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   payment-db:
     image: postgres:15
@@ -65,6 +68,11 @@ services:
       POSTGRES_DB: payment_db
     volumes:
       - payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   inventory-db:
     image: postgres:15
@@ -78,19 +86,11 @@ services:
       POSTGRES_DB: inventory_db
     volumes:
       - inventory_data:/var/lib/postgresql/data
-
-  notification-db:
-    image: postgres:15
-    container_name: fotofilo-notification-db
-    restart: always
-    ports:
-      - "5439:5432"
-    environment:
-      POSTGRES_USER: notification_user
-      POSTGRES_PASSWORD: notification_pass
-      POSTGRES_DB: notification_db
-    volumes:
-      - notification_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cart-db:
     image: postgres:15
@@ -104,26 +104,38 @@ services:
       POSTGRES_DB: cart_db
     volumes:
       - cart_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cart_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Infrastructure - Cache & Message Queue
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: fotofilo-redis
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: confluentinc/cp-zookeeper:7.5.0
     container_name: fotofilo-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:7.4.0
+    image: confluentinc/cp-kafka:7.5.0
     container_name: fotofilo-kafka
     ports:
       - "9092:9092"
@@ -132,13 +144,19 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
-    container_name: kafdrop
+    container_name: fotofilo-kafdrop
     restart: always
     ports:
       - "9000:9000"
@@ -146,10 +164,11 @@ services:
       KAFKA_BROKERCONNECT: kafka:29092
       JVM_OPTS: "-Xms32M -Xmx64M"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: fotofilo-elasticsearch
     environment:
       - discovery.type=single-node
@@ -160,15 +179,232 @@ services:
       - "9300:9300"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Microservices
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: fotofilo-auth-service
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: auth-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: auth_user
+      DATABASE_PASSWORD: auth_pass
+      DATABASE_NAME: auth_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+    ports:
+      - "50052:50052"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  product-service:
+    build:
+      context: .
+      dockerfile: apps/product-service/Dockerfile
+    container_name: fotofilo-product-service
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: product-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: product_user
+      DATABASE_PASSWORD: product_pass
+      DATABASE_NAME: product_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50051:50051"
+    depends_on:
+      product-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: apps/cart-service/Dockerfile
+    container_name: fotofilo-cart-service
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: cart-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: cart_user
+      DATABASE_PASSWORD: cart_pass
+      DATABASE_NAME: cart_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "50053:50053"
+    depends_on:
+      cart-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: .
+      dockerfile: apps/order-service/Dockerfile
+    container_name: fotofilo-order-service
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: order-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: order_user
+      DATABASE_PASSWORD: order_pass
+      DATABASE_NAME: order_db
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50054:50054"
+    depends_on:
+      order-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/payment-service/Dockerfile
+    container_name: fotofilo-payment-service
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      GRPC_URL: 0.0.0.0:50059
+      DB_HOST: payment-db
+      DB_PORT: 5432
+      DB_USERNAME: payment_user
+      DB_PASSWORD: payment_pass
+      DB_DATABASE: payment_db
+      KAFKA_BROKERS: kafka:29092
+      MOMO_PARTNER_CODE: ${MOMO_PARTNER_CODE}
+      MOMO_ACCESS_KEY: ${MOMO_ACCESS_KEY}
+      MOMO_SECRET_KEY: ${MOMO_SECRET_KEY}
+      MOMO_ENDPOINT: ${MOMO_ENDPOINT:-https://test-payment.momo.vn/v2/gateway/api/create}
+      PAYMENT_REDIRECT_URL: ${PAYMENT_REDIRECT_URL:-http://localhost:3000/payment/result}
+      PAYMENT_IPN_URL: ${PAYMENT_IPN_URL:-http://localhost:3000/api/payments/callback/momo}
+    ports:
+      - "50059:50059"
+      - "3012:3012"
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  inventories-service:
+    build:
+      context: .
+      dockerfile: apps/inventories-service/Dockerfile
+    container_name: fotofilo-inventories-service
+    environment:
+      NODE_ENV: production
+      DATABASE_HOST: inventory-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: inventory_user
+      DATABASE_PASSWORD: inventory_pass
+      DATABASE_NAME: inventory_db
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50056:50056"
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    container_name: fotofilo-notification-service
+    environment:
+      NODE_ENV: production
+      KAFKA_BROKER: kafka:29092
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM:-noreply@fotofilo.com}
+    ports:
+      - "50057:50057"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  elastic-service:
+    build:
+      context: .
+      dockerfile: apps/elastic-elastic-service/Dockerfile
+    container_name: fotofilo-elastic-service
+    environment:
+      NODE_ENV: production
+      ELASTICSEARCH_NODE: http://elasticsearch:9200
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50058:50058"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: fotofilo-api-gateway
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AUTH_SERVICE_URL: auth-service:50052
+      PRODUCT_SERVICE_URL: product-service:50051
+      CART_SERVICE_URL: cart-service:50053
+      ORDER_SERVICE_URL: order-service:50054
+      PAYMENT_SERVICE_URL: payment-service:50059
+      INVENTORIES_SERVICE_URL: inventories-service:50056
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+      - inventories-service
+    restart: unless-stopped
 
 volumes:
   auth_data:
-  user_data:
   product_data:
   order_data:
   payment_data:
   inventory_data:
-  notification_data:
   cart_data:
   redis_data:
   es_data:

@@ -54,6 +54,7 @@ export class OrderController {
       shippingAddressId: createOrderDto.shippingAddressId,
       billingAddressId: createOrderDto.billingAddressId,
       shippingMethod: createOrderDto.shippingMethod,
+      paymentMethod: createOrderDto.paymentMethod,
       notes: createOrderDto.notes,
       discountAmount: createOrderDto.discountAmount ? {
         amount: createOrderDto.discountAmount.amount,

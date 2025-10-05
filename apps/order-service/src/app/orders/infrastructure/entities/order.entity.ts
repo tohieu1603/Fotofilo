@@ -24,6 +24,20 @@ export enum ShippingMethod {
   OVERNIGHT = 'OVERNIGHT',
 }
 
+export enum PaymentMethod {
+  COD = 'COD',
+  MOMO = 'MOMO',
+  VNPAY = 'VNPAY',
+  STRIPE = 'STRIPE',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}
+
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn('uuid')
@@ -66,6 +80,25 @@ export class Order {
   // Reference to payment-service
   @Column({ name: 'payment_id', type: 'uuid', nullable: true })
   paymentId?: string;
+
+  @Column({
+    name: 'payment_method',
+    type: 'enum',
+    enum: PaymentMethod,
+    default: PaymentMethod.COD,
+  })
+  paymentMethod: PaymentMethod;
+
+  @Column({
+    name: 'payment_status',
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  paymentStatus: PaymentStatus;
+
+  @Column({ name: 'payment_url', type: 'text', nullable: true })
+  paymentUrl?: string;
 
   @Column({ type: 'varchar', length: 3, default: 'USD' })
   currency: string;

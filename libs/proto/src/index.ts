@@ -9,6 +9,7 @@ export * as Product from './generated/product';
 export * as Recommendation from './generated/recommendation';
 export * as User from './generated/user';
 export * as Address from './generated/address'; 
+export * as PayMent from './generated/payment';
 export { 
   ClientGrpc, 
   ClientOptions, 
